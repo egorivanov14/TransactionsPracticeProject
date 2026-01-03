@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionController {
 
-    private final TransactionService service;
+    private final TransactionService transactionService;
 
     /**
      * POST /api/transactions
@@ -27,7 +27,7 @@ public class TransactionController {
      */
     @PostMapping
     public ResponseEntity<Void> addTransaction(@Valid @RequestBody TransactionRequest request) {
-        service.addTransaction(request);
+        transactionService.addTransaction(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -39,7 +39,7 @@ public class TransactionController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
-        service.deleteTransaction(id);
+        transactionService.deleteTransaction(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -50,7 +50,7 @@ public class TransactionController {
      */
     @GetMapping
     public ResponseEntity<List<TransactionResponse>> getAllTransactions() {
-        List<TransactionResponse> transactions = service.getAllTransactions();
+        List<TransactionResponse> transactions = transactionService.getAllTransactions();
         return ResponseEntity.ok(transactions);
     }
 
@@ -62,7 +62,7 @@ public class TransactionController {
      */
     @GetMapping("/category/{category}")
     public ResponseEntity<List<TransactionResponse>> getAllByCategory(@PathVariable String category) {
-        List<TransactionResponse> transactions = service.getAllByCategory(category);
+        List<TransactionResponse> transactions = transactionService.getAllByCategory(category);
         return ResponseEntity.ok(transactions);
     }
 
@@ -74,20 +74,20 @@ public class TransactionController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<TransactionResponse> getById(@PathVariable Long id) {
-        TransactionResponse transaction = service.getById(id);
+        TransactionResponse transaction = transactionService.getById(id);
         return ResponseEntity.ok(transaction);
     }
 
     @GetMapping("/amount/{amount}")
     public ResponseEntity<List<TransactionResponse>> getAllByAmount(@PathVariable Long amount){
-        List<TransactionResponse> transactions = service.getAllByAmount(amount);
+        List<TransactionResponse> transactions = transactionService.getAllByAmount(amount);
 
         return ResponseEntity.ok(transactions);
     }
 
     @GetMapping("/createdAt/{createdAt}")
     public ResponseEntity<List<TransactionResponse>> getAllByCreatedAt(@PathVariable LocalDate createdAt){
-        List<TransactionResponse> transactions = service.getAllByCreatedAt(createdAt);
+        List<TransactionResponse> transactions = transactionService.getAllByCreatedAt(createdAt);
 
         return ResponseEntity.ok(transactions);
     }

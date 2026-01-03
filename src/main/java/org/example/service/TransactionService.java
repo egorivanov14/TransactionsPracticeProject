@@ -22,6 +22,4 @@ public interface TransactionService {
 
     List<TransactionResponse> getAllByCreatedAt(LocalDate createdAt);
 
-
-
 }

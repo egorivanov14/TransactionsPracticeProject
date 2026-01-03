@@ -20,6 +20,18 @@ public class GlobalExceptionsHolder {
 
     }
 
+    @ExceptionHandler(ExceedingBudgetException.class)
+    public ResponseEntity<ErrorResponse> handleExceedingError(ExceedingBudgetException exception){
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(exception.getMessage()));
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateError(DuplicateResourceException exception){
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(exception.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationError(MethodArgumentNotValidException exception) {
         String message = exception.getBindingResult()
