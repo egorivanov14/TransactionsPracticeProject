@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -47,16 +48,36 @@ public class BudgetController {
     }
 
     @DeleteMapping("/category/{category}")
-    public ResponseEntity<Void> deleteByCategory(@PathVariable String category){
-        budgetService.deleteBudgetByCategory(category);
+    public ResponseEntity<Void> deleteCurrentByCategory(@PathVariable String category){
+        budgetService.deleteCurrentBudgetByCategory(category);
 
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/category/date/{category}/{date}")
+    public ResponseEntity<Void> deleteByCategoryAndDate(@PathVariable String category, @PathVariable LocalDate date){
+        budgetService.deleteBudgetByCategoryAndDate(category, date);
+
+        return ResponseEntity.noContent().build();
+    }
+
 
     @GetMapping
     public ResponseEntity<List<BudgetResponse>> getAllBudgets(){
         List<BudgetResponse> budgetResponses = budgetService.getAllBudgets();
 
         return ResponseEntity.ok(budgetResponses);
+    }
+
+    @GetMapping("/category/{category}")
+    public ResponseEntity<BudgetResponse> getCurrentBudgetByCategory(@PathVariable String category){
+
+        return ResponseEntity.ok(budgetService.getCurrentBudgetByCategory(category));
+    }
+
+    @GetMapping("/category/date/{category}/{date}")
+    public ResponseEntity<BudgetResponse> getBudgetByCategoryAndDate(@PathVariable String category, @PathVariable LocalDate date){
+
+        return ResponseEntity.ok(budgetService.getBudgetByCategoryAndDate(category, date));
     }
 }
