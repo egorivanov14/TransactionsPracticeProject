@@ -16,8 +16,6 @@ public class BudgetResponse {
 
     private Long limitAmount;
 
-    private Long spend;
-
     private LocalDate startDate;
 
     private LocalDate endDate;

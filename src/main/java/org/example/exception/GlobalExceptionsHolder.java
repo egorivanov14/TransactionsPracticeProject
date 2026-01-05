@@ -57,4 +57,11 @@ public class GlobalExceptionsHolder {
                 .body(new ErrorResponse(
                         "Wrong type of data in " + "'" + exception.getPropertyName() + "'"));
     }
+
+    @ExceptionHandler(WrongDataException.class)
+        public ResponseEntity<ErrorResponse> handleWrongDataError(WrongDataException exception){
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(exception.getMessage()));
+    }
+
 }

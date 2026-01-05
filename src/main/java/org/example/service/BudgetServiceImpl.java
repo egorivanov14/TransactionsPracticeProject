@@ -7,13 +7,16 @@ import org.example.dto.BudgetResponse;
 import org.example.entity.Budget;
 import org.example.exception.DuplicateResourceException;
 import org.example.exception.ResourceNotFoundException;
+import org.example.exception.WrongDataException;
 import org.example.mapper.BudgetMapper;
 import org.example.repository.BudgetRepository;
+import org.example.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,16 +24,25 @@ public class BudgetServiceImpl implements BudgetService{
 
     private final BudgetRepository budgetRepository;
     private final BudgetMapper budgetMapper;
+    private final TransactionRepository transactionRepository;
 
     @Transactional
     @Override
     public void addBudget(BudgetRequest request) {
+
         if(budgetRepository.existsCurrentByCategory(request.getCategory()) ||
                 budgetRepository.existsByCategoryAndDate(request.getCategory(), request.getStartDate())){
             throw new DuplicateResourceException("Budget with this category already exists.");
         }
         else {
-            budgetRepository.save(budgetMapper.toEntity(request));
+            Budget budget = budgetMapper.toEntity(request);
+
+            if(budget.getEndDate() != null && budget.getStartDate() != null && budget.getEndDate().isBefore(budget.getStartDate())){
+                throw new WrongDataException("EndDate must be after startDate.");
+            }
+
+                budgetRepository.save(budget);
+
         }
     }
 
@@ -82,9 +94,14 @@ public class BudgetServiceImpl implements BudgetService{
     @Transactional
     @Override
     public BudgetResponse getCurrentBudgetByCategory(String category) {
-        if(budgetRepository.existsCurrentByCategory(category)){
 
-            return budgetMapper.toResponse(budgetRepository.findCurrentByCategory(category).orElseThrow());
+        Optional<Budget> budgetOptional = budgetRepository.findCurrentByCategory(category);
+
+        if(budgetOptional.isPresent()){
+
+            Budget budget = budgetOptional.get();
+
+            return budgetMapper.toResponse(budget);
         }
         else {
             throw new ResourceNotFoundException("No budget with this category now.");
@@ -94,12 +111,28 @@ public class BudgetServiceImpl implements BudgetService{
     @Transactional
     @Override
     public BudgetResponse getBudgetByCategoryAndDate(String category, LocalDate date) {
-        if(budgetRepository.existsByCategoryAndDate(category, date)){
 
-            return budgetMapper.toResponse(budgetRepository.findByCategoryAndDate(category, date).orElseThrow());
+        Optional<Budget> budgetOptional = budgetRepository.findByCategoryAndDate(category, date);
+
+        if(budgetOptional.isPresent()){
+
+            Budget budget = budgetOptional.get();
+
+            return budgetMapper.toResponse(budget);
         }
         else {
             throw new ResourceNotFoundException("No budget with this date and category.");
+        }
+    }
+
+    @Override
+    public Long getSpendAmountByBudgetId(Long id) {
+
+        if(budgetRepository.existsById(id)){
+            return transactionRepository.sumAmountByBudgetId(id);
+        }
+        else {
+            throw new ResourceNotFoundException("No budget with this id.");
         }
     }
 
@@ -107,8 +140,10 @@ public class BudgetServiceImpl implements BudgetService{
     @Override
     public void changeLimitAmount(String category, Long newLimitAmount) {
 
-        if(budgetRepository.existsCurrentByCategory(category)){
-            Budget budget = budgetRepository.findCurrentByCategory(category).orElseThrow();
+        Optional<Budget> budgetOptional = budgetRepository.findCurrentByCategory(category);
+
+        if(budgetOptional.isPresent()){
+            Budget budget = budgetOptional.get();
 
             budget.setLimitAmount(newLimitAmount);
             budgetRepository.save(budget);
@@ -126,16 +161,18 @@ public class BudgetServiceImpl implements BudgetService{
         if(budgetRepository.existsCurrentByCategory(newCategory)){
             throw new DuplicateResourceException("Budget with this new category already exists.");
         }
-
-        else if(budgetRepository.existsCurrentByCategory(oldCategory)){
-            Budget budget = budgetRepository.findCurrentByCategory(oldCategory).orElseThrow();
-
-            budget.setCategory(newCategory);
-            budgetRepository.save(budget);
-
-        }
         else {
-            throw new ResourceNotFoundException("No budget with this category.");
+            Optional<Budget> budgetOptional = budgetRepository.findCurrentByCategory(oldCategory);
+
+            if(budgetOptional.isPresent()){
+                Budget budget = budgetOptional.get();
+
+                budget.setCategory(newCategory);
+                budgetRepository.save(budget);
+            }
+            else {
+                throw new ResourceNotFoundException("No budget with this category.");
+            }
         }
     }
 

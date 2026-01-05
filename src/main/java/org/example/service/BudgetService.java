@@ -22,6 +22,8 @@ public interface BudgetService {
 
     BudgetResponse getBudgetByCategoryAndDate(String category, LocalDate date);
 
+    Long getSpendAmountByBudgetId(Long id);
+
     void changeLimitAmount(String category, Long newLimitAmount);
 
     void changeCategory(String oldCategory, String newCategory);

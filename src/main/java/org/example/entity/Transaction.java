@@ -27,10 +27,15 @@ public class Transaction {
     @Column(nullable = false, updatable = false)
     private LocalDate createdAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "budget_id")
+    private Budget budget;
+
     @PrePersist
     protected void onCreate(){
         createdAt = LocalDate.now();
     }
+
 }
 
 

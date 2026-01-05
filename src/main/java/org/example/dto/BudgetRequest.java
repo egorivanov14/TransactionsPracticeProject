@@ -1,5 +1,6 @@
 package org.example.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,4 +25,9 @@ public class BudgetRequest {
 
     @NotNull
     private PeriodType periodType;
-}
+
+    @AssertTrue(message = "endDate must be after startDate")
+    public boolean isDateValid() {
+        return endDate == null || startDate == null || endDate.isAfter(startDate);
+    }
+    }

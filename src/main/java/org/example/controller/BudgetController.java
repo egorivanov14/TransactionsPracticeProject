@@ -80,4 +80,9 @@ public class BudgetController {
 
         return ResponseEntity.ok(budgetService.getBudgetByCategoryAndDate(category, date));
     }
+
+    @GetMapping("/amount/id/{id}")
+    public ResponseEntity<Long> getSpendAmountByBudgetId(@PathVariable Long id){
+        return  ResponseEntity.ok(budgetService.getSpendAmountByBudgetId(id));
+    }
 }

@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -20,8 +19,8 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
     boolean existsCurrentByCategory(@Param("category") String category);
 
 
-    @Query("SELECT b FROM Budget b WHERE b.category = :category" +
-            " AND CURRENT_DATE BETWEEN b.startDate AND b.endDate")
+    @Query("SELECT b FROM Budget b WHERE b.category = :category " +
+            "AND CURRENT_DATE BETWEEN b.startDate AND b.endDate")
     Optional<Budget> findCurrentByCategory(@Param("category") String category);
 
     @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END " +

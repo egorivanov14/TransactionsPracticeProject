@@ -2,8 +2,11 @@ package org.example.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.example.exception.WrongDataException;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "budgets")
@@ -21,9 +24,6 @@ public class Budget {
     private Long limitAmount;
 
     @Column(nullable = false)
-    private Long spend;
-
-    @Column(nullable = false)
    private LocalDate startDate;
 
     @Column(nullable = false)
@@ -33,28 +33,29 @@ public class Budget {
     @Column(nullable = false)
     private PeriodType periodType;
 
+    @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaction> transactions = new ArrayList<>();
+
     @PrePersist
     protected void onCreate(){
-        spend = 0L;
+
+        if(endDate == null){
+
+            if(PeriodType.MONTHLY.equals(periodType) || periodType == null){
+                endDate = LocalDate.now().plusMonths(1);
+            }
+            else if(PeriodType.WEEKLY.equals(periodType)){
+                endDate = LocalDate.now().plusWeeks(1);
+            }
+            else if(PeriodType.DAILY.equals(periodType)){
+                endDate = LocalDate.now().plusDays(1);
+            }
+        }
 
         if(startDate == null){
             startDate = LocalDate.now();
         }
-        if(endDate == null){
 
-            if(periodType==PeriodType.MONTHLY){
-                endDate = LocalDate.now().plusMonths(1);
-            }
-            else if(periodType==PeriodType.WEEKLY){
-                endDate = LocalDate.now().plusWeeks(1);
-            }
-            else if(periodType==PeriodType.DAILY){
-                endDate = LocalDate.now().plusDays(1);
-            }
-            else {
-                endDate = LocalDate.now().plusMonths(1);
-            }
-        }
     }
 
 }

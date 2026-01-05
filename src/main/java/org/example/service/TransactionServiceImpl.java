@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,17 +32,18 @@ public class TransactionServiceImpl implements TransactionService{
 
         Transaction transaction = transactionMapper.toEntity(request);
 
-        if(budgetRepository.existsCurrentByCategory(transaction.getCategory())){
+        Optional<Budget> budgetOptional = budgetRepository.findCurrentByCategory(transaction.getCategory());
 
-            Budget budget = budgetRepository.findCurrentByCategory(transaction.getCategory()).orElseThrow();
+        if(budgetOptional.isPresent()){
 
-            if(budget.getSpend() + transaction.getAmount() > budget.getLimitAmount()){
-                throw new ExceedingBudgetException("The cost is more then the limit amount.");
+            Budget budget = budgetOptional.get();
+
+            if(transactionRepository.sumAmountByBudgetId(budget.getId()) + transaction.getAmount() > budget.getLimitAmount()){
+                throw new ExceedingBudgetException("The cost is more then the limit.");
             }
-            else {
-                budget.setSpend(budget.getSpend() + transaction.getAmount());
-                budgetRepository.save(budget);
-            }
+
+            budgetRepository.save(budget);
+            transaction.setBudget(budget);
         }
 
         transactionRepository.save(transaction);
@@ -54,13 +56,6 @@ public class TransactionServiceImpl implements TransactionService{
 
         Transaction transaction = transactionRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Transaction not found. No transaction with this ID."));
-
-        if(budgetRepository.existsCurrentByCategory(transaction.getCategory())){
-            Budget budget = budgetRepository.findCurrentByCategory(transaction.getCategory()).orElseThrow();
-            budget.setSpend(budget.getSpend() - transaction.getAmount());
-
-            budgetRepository.save(budget);
-        }
 
         transactionRepository.deleteById(id);
 
