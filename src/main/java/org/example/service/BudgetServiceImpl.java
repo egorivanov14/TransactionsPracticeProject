@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.dto.BudgetRequest;
 import org.example.dto.BudgetResponse;
 import org.example.entity.Budget;
+import org.example.entity.Transaction;
 import org.example.exception.DuplicateResourceException;
 import org.example.exception.ResourceNotFoundException;
 import org.example.exception.WrongDataException;
@@ -37,7 +38,7 @@ public class BudgetServiceImpl implements BudgetService{
         else {
             Budget budget = budgetMapper.toEntity(request);
 
-            if(budget.getEndDate() != null && budget.getStartDate() != null && budget.getEndDate().isBefore(budget.getStartDate())){
+            if(budget.getEndDate() != null && budget.getEndDate().isBefore(budget.getStartDate())){
                 throw new WrongDataException("EndDate must be after startDate.");
             }
 
@@ -95,36 +96,18 @@ public class BudgetServiceImpl implements BudgetService{
     @Override
     public BudgetResponse getCurrentBudgetByCategory(String category) {
 
-        Optional<Budget> budgetOptional = budgetRepository.findCurrentByCategory(category);
+        return budgetMapper.toResponse(budgetRepository.findCurrentByCategory(category).orElseThrow());
 
-        if(budgetOptional.isPresent()){
-
-            Budget budget = budgetOptional.get();
-
-            return budgetMapper.toResponse(budget);
-        }
-        else {
-            throw new ResourceNotFoundException("No budget with this category now.");
-        }
     }
 
     @Transactional
     @Override
     public BudgetResponse getBudgetByCategoryAndDate(String category, LocalDate date) {
 
-        Optional<Budget> budgetOptional = budgetRepository.findByCategoryAndDate(category, date);
-
-        if(budgetOptional.isPresent()){
-
-            Budget budget = budgetOptional.get();
-
-            return budgetMapper.toResponse(budget);
-        }
-        else {
-            throw new ResourceNotFoundException("No budget with this date and category.");
-        }
+        return budgetMapper.toResponse(budgetRepository.findByCategoryAndDate(category, date).orElseThrow());
     }
 
+    @Transactional
     @Override
     public Long getSpendAmountByBudgetId(Long id) {
 
@@ -174,6 +157,23 @@ public class BudgetServiceImpl implements BudgetService{
                 throw new ResourceNotFoundException("No budget with this category.");
             }
         }
+    }
+
+    @Transactional
+    @Override
+    public Long getBudgetRemains(String category, LocalDate date) {
+
+        if(category == null || category.trim().isEmpty()){
+            throw new WrongDataException("Category cant be empty.");
+        }
+
+        LocalDate date1 = (date == null) ? LocalDate.now() : date;
+
+        Budget budget = budgetRepository.findByCategoryAndDate(category, date1)
+                .orElseThrow(() -> new ResourceNotFoundException("No budget with this category and date."));
+
+        return budget.getLimitAmount() - transactionRepository.sumAmountByBudgetId(budget.getId());
+
     }
 
 }

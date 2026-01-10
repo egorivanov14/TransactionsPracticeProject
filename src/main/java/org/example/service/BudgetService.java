@@ -28,6 +28,6 @@ public interface BudgetService {
 
     void changeCategory(String oldCategory, String newCategory);
 
-
+    Long getBudgetRemains(String category, LocalDate date);
 
 }

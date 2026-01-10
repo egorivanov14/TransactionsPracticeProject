@@ -1,8 +1,8 @@
 package org.example.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import org.example.exception.WrongDataException;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -10,7 +10,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "budgets")
-@Data
+@Getter
+@Setter
 public class Budget {
 
     @Id
@@ -39,9 +40,13 @@ public class Budget {
     @PrePersist
     protected void onCreate(){
 
+        if(periodType == null){
+            periodType = PeriodType.MONTHLY;
+        }
+
         if(endDate == null){
 
-            if(PeriodType.MONTHLY.equals(periodType) || periodType == null){
+            if(PeriodType.MONTHLY.equals(periodType)){
                 endDate = LocalDate.now().plusMonths(1);
             }
             else if(PeriodType.WEEKLY.equals(periodType)){
@@ -50,10 +55,6 @@ public class Budget {
             else if(PeriodType.DAILY.equals(periodType)){
                 endDate = LocalDate.now().plusDays(1);
             }
-        }
-
-        if(startDate == null){
-            startDate = LocalDate.now();
         }
 
     }

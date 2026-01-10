@@ -42,7 +42,6 @@ public class TransactionServiceImpl implements TransactionService{
                 throw new ExceedingBudgetException("The cost is more then the limit.");
             }
 
-            budgetRepository.save(budget);
             transaction.setBudget(budget);
         }
 
@@ -66,12 +65,7 @@ public class TransactionServiceImpl implements TransactionService{
     public List<TransactionResponse> getAllTransactions() {
         List<Transaction> transactions = transactionRepository.findAll();
 
-        if(transactions.isEmpty()){
-            throw new ResourceNotFoundException("No transactions in database.");
-        }
-        else {
-            return transactions.stream().map(transactionMapper::toResponse).toList();
-        }
+        return transactions.stream().map(transactionMapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
@@ -79,12 +73,7 @@ public class TransactionServiceImpl implements TransactionService{
     public List<TransactionResponse> getAllByCategory(String category) {
         List<Transaction> transactions = transactionRepository.findAllByCategory(category);
 
-        if(transactions.isEmpty()){
-            throw new ResourceNotFoundException("Transactions not found. No transactions with this category.");
-        }
-        else {
-            return transactions.stream().map(transactionMapper::toResponse).toList();
-        }
+        return transactions.stream().map(transactionMapper::toResponse).toList();
 
     }
 
@@ -103,12 +92,7 @@ public class TransactionServiceImpl implements TransactionService{
 
         List<Transaction> transactions = transactionRepository.findAllByAmount(amount);
 
-        if(transactions.isEmpty()){
-            throw new ResourceNotFoundException("Transactions not found. No transactions with this amount.");
-        }
-        else {
-            return transactions.stream().map(transactionMapper::toResponse).toList();
-        }
+        return transactions.stream().map(transactionMapper::toResponse).toList();
 
     }
 
@@ -118,11 +102,6 @@ public class TransactionServiceImpl implements TransactionService{
 
         List<Transaction> transactions = transactionRepository.findAllByCreatedAt(createdAt);
 
-        if(transactions.isEmpty()){
-            throw new ResourceNotFoundException("Transactions not found. No transactions with this date.");
-        }
-        else {
-            return transactions.stream().map(transactionMapper::toResponse).toList();
-        }
+        return transactions.stream().map(transactionMapper::toResponse).toList();
     }
 }

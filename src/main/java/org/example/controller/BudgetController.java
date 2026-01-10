@@ -26,14 +26,14 @@ public class BudgetController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PostMapping("/changeLimitAmount/{category}/{newLimitAmount}")
+    @PutMapping("/changeLimitAmount/{category}/{newLimitAmount}")
     public ResponseEntity<Void> changeLimitAmount(@PathVariable String category, @PathVariable Long newLimitAmount){
         budgetService.changeLimitAmount(category, newLimitAmount);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
-    @PostMapping("/changeCategory/{oldCategory}/{newCategory}")
+    @PutMapping("/changeCategory/{oldCategory}/{newCategory}")
     public ResponseEntity<Void> changeCategory(@PathVariable String oldCategory, @PathVariable String newCategory){
         budgetService.changeCategory(oldCategory, newCategory);
 
@@ -84,5 +84,10 @@ public class BudgetController {
     @GetMapping("/amount/id/{id}")
     public ResponseEntity<Long> getSpendAmountByBudgetId(@PathVariable Long id){
         return  ResponseEntity.ok(budgetService.getSpendAmountByBudgetId(id));
+    }
+
+    @GetMapping("/remains/category/date/{category}/{date}")
+    public ResponseEntity<Long> getBudgetRemains(@PathVariable String category, @PathVariable LocalDate date){
+        return ResponseEntity.ok(budgetService.getBudgetRemains(category, date));
     }
 }

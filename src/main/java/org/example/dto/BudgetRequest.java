@@ -19,15 +19,11 @@ public class BudgetRequest {
     @Min(0L)
     private Long limitAmount;
 
+    @NotNull
     private LocalDate startDate;
 
     private LocalDate endDate;
 
-    @NotNull
     private PeriodType periodType;
 
-    @AssertTrue(message = "endDate must be after startDate")
-    public boolean isDateValid() {
-        return endDate == null || startDate == null || endDate.isAfter(startDate);
-    }
-    }
+}
