@@ -13,7 +13,7 @@ import java.time.LocalDate;
 public class BudgetRequest {
 
     @NotBlank
-    private String category;
+    private String account;
 
     @NotNull
     @Min(0L)

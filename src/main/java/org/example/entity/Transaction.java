@@ -22,7 +22,10 @@ public class Transaction {
     private Long amount;
 
     @Column(nullable = false)
-    private String category;
+    private String account;
+
+//    @Column(nullable = false)
+//    private String tag;
 
     @Column(nullable = false, updatable = false)
     private LocalDate createdAt;

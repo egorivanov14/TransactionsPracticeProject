@@ -12,7 +12,7 @@ public class BudgetResponse {
 
     private Long id;
 
-    private String category;
+    private String account;
 
     private Long limitAmount;
 

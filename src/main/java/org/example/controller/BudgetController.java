@@ -26,16 +26,16 @@ public class BudgetController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PutMapping("/changeLimitAmount/{category}/{newLimitAmount}")
-    public ResponseEntity<Void> changeLimitAmount(@PathVariable String category, @PathVariable Long newLimitAmount){
-        budgetService.changeLimitAmount(category, newLimitAmount);
+    @PutMapping("/changeLimitAmount/{account}/{newLimitAmount}")
+    public ResponseEntity<Void> changeLimitAmount(@PathVariable String account, @PathVariable Long newLimitAmount){
+        budgetService.changeLimitAmount(account, newLimitAmount);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
-    @PutMapping("/changeCategory/{oldCategory}/{newCategory}")
-    public ResponseEntity<Void> changeCategory(@PathVariable String oldCategory, @PathVariable String newCategory){
-        budgetService.changeCategory(oldCategory, newCategory);
+    @PutMapping("/changeAccount/{oldAccount}/{newAccount}")
+    public ResponseEntity<Void> changeAccount(@PathVariable String oldAccount, @PathVariable String newAccount){
+        budgetService.changeAccount(oldAccount, newAccount);
 
         return ResponseEntity.noContent().build();
     }
@@ -49,14 +49,14 @@ public class BudgetController {
 
     @DeleteMapping("/category/{category}")
     public ResponseEntity<Void> deleteCurrentByCategory(@PathVariable String category){
-        budgetService.deleteCurrentBudgetByCategory(category);
+        budgetService.deleteCurrentBudgetByAccount(category);
 
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/category/date/{category}/{date}")
-    public ResponseEntity<Void> deleteByCategoryAndDate(@PathVariable String category, @PathVariable LocalDate date){
-        budgetService.deleteBudgetByCategoryAndDate(category, date);
+    @DeleteMapping("/account/date/{account}/{date}")
+    public ResponseEntity<Void> deleteByAccountAndDate(@PathVariable String account, @PathVariable LocalDate date){
+        budgetService.deleteBudgetByAccountAndDate(account, date);
 
         return ResponseEntity.noContent().build();
     }
@@ -69,16 +69,16 @@ public class BudgetController {
         return ResponseEntity.ok(budgetResponses);
     }
 
-    @GetMapping("/category/{category}")
-    public ResponseEntity<BudgetResponse> getCurrentBudgetByCategory(@PathVariable String category){
+    @GetMapping("/account/{account}")
+    public ResponseEntity<BudgetResponse> getCurrentBudgetByAccount(@PathVariable String account){
 
-        return ResponseEntity.ok(budgetService.getCurrentBudgetByCategory(category));
+        return ResponseEntity.ok(budgetService.getCurrentBudgetByAccount(account));
     }
 
-    @GetMapping("/category/date/{category}/{date}")
-    public ResponseEntity<BudgetResponse> getBudgetByCategoryAndDate(@PathVariable String category, @PathVariable LocalDate date){
+    @GetMapping("/account/date/{account}/{date}")
+    public ResponseEntity<BudgetResponse> getBudgetByAccountAndDate(@PathVariable String account, @PathVariable LocalDate date){
 
-        return ResponseEntity.ok(budgetService.getBudgetByCategoryAndDate(category, date));
+        return ResponseEntity.ok(budgetService.getBudgetByAccountAndDate(account, date));
     }
 
     @GetMapping("/amount/id/{id}")
@@ -86,8 +86,8 @@ public class BudgetController {
         return  ResponseEntity.ok(budgetService.getSpendAmountByBudgetId(id));
     }
 
-    @GetMapping("/remains/category/date/{category}/{date}")
-    public ResponseEntity<Long> getBudgetRemains(@PathVariable String category, @PathVariable LocalDate date){
-        return ResponseEntity.ok(budgetService.getBudgetRemains(category, date));
+    @GetMapping("/remains/account/date/{account}/{date}")
+    public ResponseEntity<Long> getBudgetRemains(@PathVariable String account, @PathVariable LocalDate date){
+        return ResponseEntity.ok(budgetService.getBudgetRemains(account, date));
     }
 }

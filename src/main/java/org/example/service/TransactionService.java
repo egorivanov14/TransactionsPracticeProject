@@ -14,7 +14,7 @@ public interface TransactionService {
 
     List<TransactionResponse> getAllTransactions();
 
-    List<TransactionResponse> getAllByCategory(String category);
+    List<TransactionResponse> getAllByAccount(String account);
 
     TransactionResponse getById(Long id);
 

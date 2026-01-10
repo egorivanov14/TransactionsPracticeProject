@@ -32,7 +32,7 @@ public class TransactionServiceImpl implements TransactionService{
 
         Transaction transaction = transactionMapper.toEntity(request);
 
-        Optional<Budget> budgetOptional = budgetRepository.findCurrentByCategory(transaction.getCategory());
+        Optional<Budget> budgetOptional = budgetRepository.findCurrentByAccount(transaction.getAccount());
 
         if(budgetOptional.isPresent()){
 
@@ -70,8 +70,8 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional(readOnly = true)
     @Override
-    public List<TransactionResponse> getAllByCategory(String category) {
-        List<Transaction> transactions = transactionRepository.findAllByCategory(category);
+    public List<TransactionResponse> getAllByAccount(String account) {
+        List<Transaction> transactions = transactionRepository.findAllByAccount(account);
 
         return transactions.stream().map(transactionMapper::toResponse).toList();
 

@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.dto.BudgetRequest;
 import org.example.dto.BudgetResponse;
 import org.example.entity.Budget;
-import org.example.entity.Transaction;
 import org.example.exception.DuplicateResourceException;
 import org.example.exception.ResourceNotFoundException;
 import org.example.exception.WrongDataException;
@@ -31,9 +30,9 @@ public class BudgetServiceImpl implements BudgetService{
     @Override
     public void addBudget(BudgetRequest request) {
 
-        if(budgetRepository.existsCurrentByCategory(request.getCategory()) ||
-                budgetRepository.existsByCategoryAndDate(request.getCategory(), request.getStartDate())){
-            throw new DuplicateResourceException("Budget with this category already exists.");
+        if(budgetRepository.existsCurrentByAccount(request.getAccount()) ||
+                budgetRepository.existsByAccountAndDate(request.getAccount(), request.getStartDate())){
+            throw new DuplicateResourceException("Budget with this account already exists.");
         }
         else {
             Budget budget = budgetMapper.toEntity(request);
@@ -61,25 +60,25 @@ public class BudgetServiceImpl implements BudgetService{
 
     @Transactional
     @Override
-    public void deleteCurrentBudgetByCategory(String category) {
+    public void deleteCurrentBudgetByAccount(String account) {
 
-        if(budgetRepository.existsCurrentByCategory(category)){
-            budgetRepository.deleteCurrentByCategory(category);
+        if(budgetRepository.existsCurrentByAccount(account)){
+            budgetRepository.deleteCurrentByAccount(account);
         }
         else {
-            throw new ResourceNotFoundException("No budget with ths category.");
+            throw new ResourceNotFoundException("No budget with ths account.");
         }
     }
 
     @Transactional
     @Override
-    public void deleteBudgetByCategoryAndDate(String category, LocalDate date) {
+    public void deleteBudgetByAccountAndDate(String account, LocalDate date) {
 
-        if(budgetRepository.existsByCategoryAndDate(category, date)){
-            budgetRepository.deleteByCategoryAndDate(category, date);
+        if(budgetRepository.existsByAccountAndDate(account, date)){
+            budgetRepository.deleteByAccountAndDate(account, date);
         }
         else {
-            throw new ResourceNotFoundException("No budget with this category and date.");
+            throw new ResourceNotFoundException("No budget with this account and date.");
         }
     }
 
@@ -94,17 +93,17 @@ public class BudgetServiceImpl implements BudgetService{
 
     @Transactional
     @Override
-    public BudgetResponse getCurrentBudgetByCategory(String category) {
+    public BudgetResponse getCurrentBudgetByAccount(String account) {
 
-        return budgetMapper.toResponse(budgetRepository.findCurrentByCategory(category).orElseThrow());
+        return budgetMapper.toResponse(budgetRepository.findCurrentByAccount(account).orElseThrow());
 
     }
 
     @Transactional
     @Override
-    public BudgetResponse getBudgetByCategoryAndDate(String category, LocalDate date) {
+    public BudgetResponse getBudgetByAccountAndDate(String account, LocalDate date) {
 
-        return budgetMapper.toResponse(budgetRepository.findByCategoryAndDate(category, date).orElseThrow());
+        return budgetMapper.toResponse(budgetRepository.findByAccountAndDate(account, date).orElseThrow());
     }
 
     @Transactional
@@ -121,9 +120,9 @@ public class BudgetServiceImpl implements BudgetService{
 
     @Transactional
     @Override
-    public void changeLimitAmount(String category, Long newLimitAmount) {
+    public void changeLimitAmount(String account, Long newLimitAmount) {
 
-        Optional<Budget> budgetOptional = budgetRepository.findCurrentByCategory(category);
+        Optional<Budget> budgetOptional = budgetRepository.findCurrentByAccount(account);
 
         if(budgetOptional.isPresent()){
             Budget budget = budgetOptional.get();
@@ -132,45 +131,45 @@ public class BudgetServiceImpl implements BudgetService{
             budgetRepository.save(budget);
         }
         else {
-            throw new ResourceNotFoundException("No budget with this category.");
+            throw new ResourceNotFoundException("No budget with this account.");
         }
 
     }
 
     @Transactional
     @Override
-    public void changeCategory(String oldCategory, String newCategory) {
+    public void changeAccount(String oldAccount, String newAccount) {
 
-        if(budgetRepository.existsCurrentByCategory(newCategory)){
-            throw new DuplicateResourceException("Budget with this new category already exists.");
+        if(budgetRepository.existsCurrentByAccount(newAccount)){
+            throw new DuplicateResourceException("Budget with this new account already exists.");
         }
         else {
-            Optional<Budget> budgetOptional = budgetRepository.findCurrentByCategory(oldCategory);
+            Optional<Budget> budgetOptional = budgetRepository.findCurrentByAccount(oldAccount);
 
             if(budgetOptional.isPresent()){
                 Budget budget = budgetOptional.get();
 
-                budget.setCategory(newCategory);
+                budget.setAccount(newAccount);
                 budgetRepository.save(budget);
             }
             else {
-                throw new ResourceNotFoundException("No budget with this category.");
+                throw new ResourceNotFoundException("No budget with this account.");
             }
         }
     }
 
     @Transactional
     @Override
-    public Long getBudgetRemains(String category, LocalDate date) {
+    public Long getBudgetRemains(String account, LocalDate date) {
 
-        if(category == null || category.trim().isEmpty()){
-            throw new WrongDataException("Category cant be empty.");
+        if(account == null || account.trim().isEmpty()){
+            throw new WrongDataException("Account cant be empty.");
         }
 
         LocalDate date1 = (date == null) ? LocalDate.now() : date;
 
-        Budget budget = budgetRepository.findByCategoryAndDate(category, date1)
-                .orElseThrow(() -> new ResourceNotFoundException("No budget with this category and date."));
+        Budget budget = budgetRepository.findByAccountAndDate(account, date1)
+                .orElseThrow(() -> new ResourceNotFoundException("No budget with this account and date."));
 
         return budget.getLimitAmount() - transactionRepository.sumAmountByBudgetId(budget.getId());
 

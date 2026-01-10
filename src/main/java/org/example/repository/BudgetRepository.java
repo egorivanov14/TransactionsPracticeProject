@@ -14,34 +14,34 @@ import java.util.Optional;
 public interface BudgetRepository extends JpaRepository<Budget, Long> {
 
     @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END " +
-    "FROM Budget b WHERE b.category = :category " +
+    "FROM Budget b WHERE b.account = :account " +
     "AND CURRENT_DATE BETWEEN b.startDate AND b.endDate")
-    boolean existsCurrentByCategory(@Param("category") String category);
+    boolean existsCurrentByAccount(@Param("account") String account);
 
 
-    @Query("SELECT b FROM Budget b WHERE b.category = :category " +
+    @Query("SELECT b FROM Budget b WHERE b.account = :account " +
             "AND CURRENT_DATE BETWEEN b.startDate AND b.endDate")
-    Optional<Budget> findCurrentByCategory(@Param("category") String category);
+    Optional<Budget> findCurrentByAccount(@Param("account") String account);
 
     @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END " +
-            "FROM Budget b WHERE b.category = :category " +
+            "FROM Budget b WHERE b.account = :account " +
             "AND :date BETWEEN b.startDate AND b.endDate")
-    boolean existsByCategoryAndDate(@Param("category") String category,@Param("date") LocalDate date);
+    boolean existsByAccountAndDate(@Param("account") String account,@Param("date") LocalDate date);
 
 
-    @Query("SELECT b FROM Budget b WHERE b.category = :category " +
+    @Query("SELECT b FROM Budget b WHERE b.account = :account " +
             "AND :date BETWEEN b.startDate AND b.endDate")
-    Optional<Budget> findByCategoryAndDate(@Param("category") String category,@Param("date") LocalDate date);
+    Optional<Budget> findByAccountAndDate(@Param("account") String account,@Param("date") LocalDate date);
 
     @Modifying
-    @Query("DELETE FROM Budget b WHERE b.category = :category " +
+    @Query("DELETE FROM Budget b WHERE b.account = :account " +
             "AND CURRENT_DATE BETWEEN b.startDate AND b.endDate")
-    void deleteCurrentByCategory(@Param("category") String category);
+    void deleteCurrentByAccount(@Param("account") String account);
 
     @Modifying
-    @Query("DELETE FROM Budget b WHERE b.category = :category " +
+    @Query("DELETE FROM Budget b WHERE b.account = :account " +
             "AND :date BETWEEN b.startDate AND b.endDate")
-    void deleteByCategoryAndDate(@Param("category") String category,@Param("date") LocalDate date);
+    void deleteByAccountAndDate(@Param("account") String account, @Param("date") LocalDate date);
 
 
 

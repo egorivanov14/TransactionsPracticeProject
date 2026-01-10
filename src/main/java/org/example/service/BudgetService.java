@@ -12,22 +12,22 @@ public interface BudgetService {
 
     void deleteBudgetById(Long id);
 
-    void deleteCurrentBudgetByCategory(String category);
+    void deleteCurrentBudgetByAccount(String account);
 
-    void deleteBudgetByCategoryAndDate(String category, LocalDate date);
+    void deleteBudgetByAccountAndDate(String account, LocalDate date);
 
     List<BudgetResponse> getAllBudgets();
 
-    BudgetResponse getCurrentBudgetByCategory(String category);
+    BudgetResponse getCurrentBudgetByAccount(String account);
 
-    BudgetResponse getBudgetByCategoryAndDate(String category, LocalDate date);
+    BudgetResponse getBudgetByAccountAndDate(String account, LocalDate date);
 
     Long getSpendAmountByBudgetId(Long id);
 
-    void changeLimitAmount(String category, Long newLimitAmount);
+    void changeLimitAmount(String account, Long newLimitAmount);
 
-    void changeCategory(String oldCategory, String newCategory);
+    void changeAccount(String oldAccount, String newAccount);
 
-    Long getBudgetRemains(String category, LocalDate date);
+    Long getBudgetRemains(String account, LocalDate date);
 
 }

@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    List<Transaction> findAllByCategory(String category);
+    List<Transaction> findAllByAccount(String account);
 
     List<Transaction> findAllByCreatedAt(LocalDate createdAt);
 

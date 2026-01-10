@@ -19,7 +19,7 @@ public class Budget {
     private Long id;
 
     @Column(nullable = false)
-    private String category;
+    private String account;
 
     @Column(nullable = false)
     private Long limitAmount;

@@ -9,7 +9,9 @@ public class TransactionResponse {
 
     private Long id;
 
-    private String category;
+    private String account;
+
+//    private String tag;
 
     private Long amount;
 

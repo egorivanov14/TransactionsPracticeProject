@@ -60,9 +60,9 @@ public class TransactionController {
      * {category} передается в URL (например, /category/Еда)
      * Возвращает список TransactionResponse или пустой список []
      */
-    @GetMapping("/category/{category}")
-    public ResponseEntity<List<TransactionResponse>> getAllByCategory(@PathVariable String category) {
-        List<TransactionResponse> transactions = transactionService.getAllByCategory(category);
+    @GetMapping("/account/{account}")
+    public ResponseEntity<List<TransactionResponse>> getAllByAccount(@PathVariable String account) {
+        List<TransactionResponse> transactions = transactionService.getAllByAccount(account);
         return ResponseEntity.ok(transactions);
     }
 

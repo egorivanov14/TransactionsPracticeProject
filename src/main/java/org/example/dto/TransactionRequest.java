@@ -11,5 +11,8 @@ public class TransactionRequest {
     private Long amount;
 
     @NotBlank
-    private String category;
+    private String account;
+
+//    @NotBlank
+//    private String tag;
 }
