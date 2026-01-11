@@ -16,6 +16,12 @@ public interface TransactionService {
 
     List<TransactionResponse> getAllByAccount(String account);
 
+    List<TransactionResponse> getAllByCategory(String category);
+
+    List<TransactionResponse> getAllByBudgetAccountAndCategory(String budgetAccount, String category, LocalDate date);
+
+    List<TransactionResponse> getAllByBudgetIdAndCategory(Long budgetId, String category);
+
     TransactionResponse getById(Long id);
 
     List<TransactionResponse> getAllByAmount(Long amount);

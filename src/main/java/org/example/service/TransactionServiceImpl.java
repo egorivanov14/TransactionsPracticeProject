@@ -79,6 +79,41 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional(readOnly = true)
     @Override
+    public List<TransactionResponse> getAllByCategory(String category) {
+
+        List<Transaction> transactions = transactionRepository.findAllByCategory(category);
+
+        return transactions.stream().map(transactionMapper::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<TransactionResponse> getAllByBudgetAccountAndCategory(String budgetAccount, String category, LocalDate date) {
+
+        if(date == null){
+            List<Transaction> transactions = transactionRepository.
+                    findAllByCurrentBudgetAccountAndCategory(budgetAccount, category);
+
+            return transactions.stream().map(transactionMapper::toResponse).toList();
+        }
+
+        List<Transaction> transactions = transactionRepository.
+                findAllByBudgetAccountCategoryAndDate(budgetAccount, category, date);
+
+        return transactions.stream().map(transactionMapper::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<TransactionResponse> getAllByBudgetIdAndCategory(Long budgetId, String category) {
+
+        List<Transaction> transactions = transactionRepository.findAllByBudgetIdAndCategory(budgetId, category);
+
+        return transactions.stream().map(transactionMapper::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public TransactionResponse getById(Long id) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found. No transaction with this ID."));
@@ -86,7 +121,7 @@ public class TransactionServiceImpl implements TransactionService{
         return transactionMapper.toResponse(transaction);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<TransactionResponse> getAllByAmount(Long amount) {
 
@@ -96,7 +131,7 @@ public class TransactionServiceImpl implements TransactionService{
 
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<TransactionResponse> getAllByCreatedAt(LocalDate createdAt) {
 

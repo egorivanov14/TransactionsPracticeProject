@@ -24,8 +24,8 @@ public class Transaction {
     @Column(nullable = false)
     private String account;
 
-//    @Column(nullable = false)
-//    private String tag;
+    @Column(nullable = false)
+    private String category;
 
     @Column(nullable = false, updatable = false)
     private LocalDate createdAt;

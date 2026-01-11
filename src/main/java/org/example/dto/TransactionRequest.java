@@ -13,6 +13,6 @@ public class TransactionRequest {
     @NotBlank
     private String account;
 
-//    @NotBlank
-//    private String tag;
+    @NotBlank
+    private String category;
 }

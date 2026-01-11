@@ -91,4 +91,25 @@ public class TransactionController {
 
         return ResponseEntity.ok(transactions);
     }
+
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<TransactionResponse>> getAllByCategory(@PathVariable String category){
+        List<TransactionResponse> transactions = transactionService.getAllByCategory(category);
+
+        return ResponseEntity.ok(transactions);
+    }
+
+    @GetMapping("budgetAccount/{budgetAccount}/category/{category}")
+    public ResponseEntity<List<TransactionResponse>> getAllByBudgetAccountAndCategory(
+            @PathVariable String budgetAccount, @PathVariable String category,
+            @RequestParam(required = false) LocalDate date){
+        List<TransactionResponse> transactions = transactionService.getAllByBudgetAccountAndCategory(budgetAccount, category, date);
+
+        return ResponseEntity.ok(transactions);
+    }
+
+    @GetMapping("/budgetId/{budgetId}/category/{category")
+    public ResponseEntity<List<TransactionResponse>> getAllByBudgetIdAndCategory(Long budgetId, String category){
+        return ResponseEntity.ok(transactionService.getAllByBudgetIdAndCategory(budgetId, category));
+    }
 }

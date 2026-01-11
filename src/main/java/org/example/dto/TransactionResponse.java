@@ -11,7 +11,7 @@ public class TransactionResponse {
 
     private String account;
 
-//    private String tag;
+    private String category;
 
     private Long amount;
 

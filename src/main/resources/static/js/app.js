@@ -20,25 +20,28 @@ async function loadBudgets() {
         const budgets = await response.json();
 
         const html = budgets.map(b => `
-            <div class="item">
+            <div class="item compact-item">
                 <div class="item-content">
                     <div class="item-title">${b.account}</div>
-                    <div class="item-subtitle">Лимит: ${b.limitAmount.toLocaleString()} ₽ | ${b.periodType} | ${b.startDate} → ${b.endDate}</div>
+                    <div class="item-subtitle">
+                        Лимит: ${b.limitAmount.toLocaleString()} ₽ |
+                        ${b.periodType} | ${b.startDate} → ${b.endDate}
+                    </div>
                 </div>
-                <button class="delete-btn" onclick="deleteBudgetById(${b.id})">🗑️ Удалить</button>
+                <button class="delete-btn compact-btn" onclick="deleteBudgetById(${b.id})">🗑️</button>
             </div>
         `).join('');
 
-        list.innerHTML = html || '<p class="empty-state">Бюджетов пока нет. Создайте первый!</p>';
+        list.innerHTML = html || '<p class="empty-state">Бюджетов нет</p>';
     } catch (error) {
-        showMessage('budgetsList', '❌ Ошибка загрузки бюджетов', true);
-        list.innerHTML = '<p class="empty-state">Ошибка загрузки</p>';
+        showMessage('budgetsList', '❌ Ошибка загрузки', true);
+        list.innerHTML = '<p class="empty-state">Ошибка</p>';
     }
 }
 
 // Удалить бюджет по ID
 async function deleteBudgetById(id) {
-    if (!confirm('❗ Вы уверены, что хотите удалить этот бюджет?')) return;
+    if (!confirm('❗ Удалить бюджет?')) return;
 
     try {
         const response = await fetch(`${API_URL}/budgets/id/${id}`, {
@@ -46,14 +49,14 @@ async function deleteBudgetById(id) {
         });
 
         if (response.ok) {
-            showMessage('budgetsList', '✅ Бюджет успешно удалён!');
+            showMessage('budgetsList', '✅ Удалён!');
             loadBudgets();
         } else {
             const error = await response.json();
             showMessage('budgetsList', `❌ ${error.message}`, true);
         }
     } catch (error) {
-        showMessage('budgetsList', '❌ Ошибка при удалении бюджета', true);
+        showMessage('budgetsList', '❌ Ошибка', true);
     }
 }
 
@@ -63,6 +66,7 @@ document.getElementById('budgetForm').addEventListener('submit', async (e) => {
 
     const account = document.getElementById('budgetAccount').value;
     const limitAmount = document.getElementById('budgetLimit').value;
+    const periodType = document.getElementById('budgetPeriod').value;
 
     try {
         const response = await fetch(`${API_URL}/budgets`, {
@@ -72,12 +76,12 @@ document.getElementById('budgetForm').addEventListener('submit', async (e) => {
                 account: account,
                 limitAmount: parseInt(limitAmount),
                 startDate: new Date().toISOString().split('T')[0],
-                periodType: 'MONTHLY'
+                periodType: periodType
             })
         });
 
         if (response.ok) {
-            showMessage('budgetsList', `✅ Бюджет "${account}" успешно создан!`);
+            showMessage('budgetsList', `✅ "${account}" создан!`);
             loadBudgets();
             document.getElementById('budgetForm').reset();
         } else {
@@ -85,7 +89,7 @@ document.getElementById('budgetForm').addEventListener('submit', async (e) => {
             showMessage('budgetsList', `❌ ${error.message}`, true);
         }
     } catch (error) {
-        showMessage('budgetsList', '❌ Ошибка подключения к серверу', true);
+        showMessage('budgetsList', '❌ Ошибка', true);
     }
 });
 
@@ -99,7 +103,6 @@ document.getElementById('budgetRemainsForm').addEventListener('submit', async (e
     const resultDiv = document.getElementById('remainsResult');
 
     resultDiv.innerHTML = '<div class="loading"></div>';
-    resultDiv.className = 'result-box';
 
     try {
         const url = date
@@ -112,20 +115,20 @@ document.getElementById('budgetRemainsForm').addEventListener('submit', async (e
             const remains = await response.json();
 
             if (remains < 0) {
-                resultDiv.innerHTML = `❌ Бюджет "${account}" превышен на ${Math.abs(remains).toLocaleString()} ₽`;
-                resultDiv.className = 'result-box result-error';
+                resultDiv.innerHTML = `❌ Превышен на ${Math.abs(remains).toLocaleString()} ₽`;
+                resultDiv.className = 'result-box compact-result result-error';
             } else {
-                resultDiv.innerHTML = `✅ Остаток на счёте "${account}": ${remains.toLocaleString()} ₽`;
-                resultDiv.className = 'result-box result-success';
+                resultDiv.innerHTML = `✅ ${remains.toLocaleString()} ₽`;
+                resultDiv.className = 'result-box compact-result result-success';
             }
         } else {
             const error = await response.json();
             resultDiv.innerHTML = `❌ ${error.message}`;
-            resultDiv.className = 'result-box result-error';
+            resultDiv.className = 'result-box compact-result result-error';
         }
     } catch (error) {
-        resultDiv.innerHTML = '❌ Ошибка при проверке остатка';
-        resultDiv.className = 'result-box result-error';
+        resultDiv.innerHTML = '❌ Ошибка';
+        resultDiv.className = 'result-box compact-result result-error';
     }
 });
 
@@ -143,7 +146,7 @@ document.getElementById('changeAccountForm').addEventListener('submit', async (e
         });
 
         if (response.ok) {
-            showMessage('budgetsList', `✅ Счёт переименован: "${oldAccount}" → "${newAccount}"`);
+            showMessage('budgetsList', `✅ "${oldAccount}" → "${newAccount}"`);
             loadBudgets();
             document.getElementById('changeAccountForm').reset();
         } else {
@@ -151,7 +154,7 @@ document.getElementById('changeAccountForm').addEventListener('submit', async (e
             showMessage('budgetsList', `❌ ${error.message}`, true);
         }
     } catch (error) {
-        showMessage('budgetsList', '❌ Ошибка при изменении счёта', true);
+        showMessage('budgetsList', '❌ Ошибка', true);
     }
 });
 
@@ -169,7 +172,7 @@ document.getElementById('changeLimitForm').addEventListener('submit', async (e) 
         });
 
         if (response.ok) {
-            showMessage('budgetsList', `✅ Лимит для "${account}" изменён на ${parseInt(newLimit).toLocaleString()} ₽`);
+            showMessage('budgetsList', `✅ Лимит "${account}" ${newLimit} ₽`);
             loadBudgets();
             document.getElementById('changeLimitForm').reset();
         } else {
@@ -177,41 +180,61 @@ document.getElementById('changeLimitForm').addEventListener('submit', async (e) 
             showMessage('budgetsList', `❌ ${error.message}`, true);
         }
     } catch (error) {
-        showMessage('budgetsList', '❌ Ошибка при изменении лимита', true);
+        showMessage('budgetsList', '❌ Ошибка', true);
     }
 });
 
-// ====== РАБОТА С ТРАНЗАКЦИЯМИ ======
+// ====== ТРАНЗАКЦИИ ======
 
-// Загрузить все транзакции
-async function loadTransactions() {
+// Загрузить транзакции (с опциональным фильтром)
+async function loadTransactions(filters = {}) {
     const list = document.getElementById('transactionsList');
     list.innerHTML = '<div class="loading"></div>';
 
+    let url = `${API_URL}/transactions`;
+
+    // ИСПРАВЛЕННАЯ ЛОГИКА ФИЛЬТРА
+    if (filters.budgetAccount && filters.category) {
+        url = `${API_URL}/transactions/budgetAccount/${filters.budgetAccount}/category/${filters.category}`;
+        if (filters.date) {
+            url += `?date=${filters.date}`;
+        }
+    } else if (filters.budgetAccount) {
+        url = `${API_URL}/transactions/account/${filters.budgetAccount}`;
+    } else if (filters.category) {
+        url = `${API_URL}/transactions/category/${filters.category}`;
+    }
+
     try {
-        const response = await fetch(`${API_URL}/transactions`);
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const transactions = await response.json();
 
         const html = transactions.map(t => `
-            <div class="item">
+            <div class="item compact-item">
                 <div class="item-content">
-                    <div class="item-title">${t.account}</div>
+                    <div class="item-title">${t.account}${t.category ? ` → ${t.category}` : ''}</div>
                     <div class="item-subtitle">${t.amount.toLocaleString()} ₽ | ${t.createdAt}</div>
                 </div>
-                <button class="delete-btn" onclick="deleteTransaction(${t.id})">🗑️ Удалить</button>
+                <button class="delete-btn compact-btn" onclick="deleteTransaction(${t.id})">🗑️</button>
             </div>
         `).join('');
 
-        list.innerHTML = html || '<p class="empty-state">Транзакций пока нет</p>';
+        list.innerHTML = html || '<p class="empty-state">Нет транзакций</p>';
     } catch (error) {
-        showMessage('transactionsList', '❌ Ошибка загрузки транзакций', true);
-        list.innerHTML = '<p class="empty-state">Ошибка загрузки</p>';
+        console.error('Ошибка загрузки транзакций:', error);
+        showMessage('transactionsList', '❌ Ошибка загрузки', true);
+        list.innerHTML = '<p class="empty-state">Ошибка</p>';
     }
 }
 
-// Удалить транзакцию по ID
+// Удалить транзакцию
 async function deleteTransaction(id) {
-    if (!confirm('❗ Удалить эту транзакцию?')) return;
+    if (!confirm('❗ Удалить?')) return;
 
     try {
         const response = await fetch(`${API_URL}/transactions/${id}`, {
@@ -219,7 +242,7 @@ async function deleteTransaction(id) {
         });
 
         if (response.ok) {
-            showMessage('transactionsList', '✅ Транзакция удалена!');
+            showMessage('transactionsList', '✅ Удалена!');
             loadTransactions();
             loadBudgets();
         } else {
@@ -227,7 +250,7 @@ async function deleteTransaction(id) {
             showMessage('transactionsList', `❌ ${error.message}`, true);
         }
     } catch (error) {
-        showMessage('transactionsList', '❌ Ошибка при удалении транзакции', true);
+        showMessage('transactionsList', '❌ Ошибка', true);
     }
 }
 
@@ -236,6 +259,7 @@ document.getElementById('transactionForm').addEventListener('submit', async (e) 
     e.preventDefault();
 
     const account = document.getElementById('transactionAccount').value;
+    const category = document.getElementById('transactionCategory').value;
     const amount = document.getElementById('transactionAmount').value;
 
     try {
@@ -244,12 +268,13 @@ document.getElementById('transactionForm').addEventListener('submit', async (e) 
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 account: account,
+                category: category,
                 amount: parseInt(amount)
             })
         });
 
         if (response.ok) {
-            showMessage('transactionsList', `✅ Расход ${parseInt(amount).toLocaleString()} ₽ добавлен!`);
+            showMessage('transactionsList', `✅ ${amount} ₽`);
             loadTransactions();
             loadBudgets();
             document.getElementById('transactionForm').reset();
@@ -258,12 +283,51 @@ document.getElementById('transactionForm').addEventListener('submit', async (e) 
             showMessage('transactionsList', `❌ ${error.message}`, true);
         }
     } catch (error) {
-        showMessage('transactionsList', '❌ Ошибка подключения к серверу', true);
+        showMessage('transactionsList', '❌ Ошибка', true);
     }
 });
 
-// Загрузить данные при старте
-window.onload = function() {
-    loadBudgets();
-    loadTransactions();
-};
+// ИСПРАВЛЕННАЯ ФИЛЬТРАЦИЯ
+document.getElementById('filterForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const budgetAccount = document.getElementById('filterBudgetAccount').value;
+    const category = document.getElementById('filterCategory').value;
+    const date = document.getElementById('filterDate').value;
+
+    // Очищаем поля если они пустые
+    const filters = {};
+    if (budgetAccount.trim()) filters.budgetAccount = budgetAccount.trim();
+    if (category.trim()) filters.category = category.trim();
+    if (date) filters.date = date;
+
+    loadTransactions(filters);
+});
+
+// СТАБИЛЬНАЯ ЗАГРУЗКА ПРИ СТАРТЕ
+window.addEventListener('DOMContentLoaded', function() {
+    // Загружаем с небольшой задержкой для стабильности
+    setTimeout(() => {
+        loadBudgets();
+        loadTransactions();
+    }, 100);
+});
+
+// Проверка подключения к API
+async function checkApiConnection() {
+    try {
+        const response = await fetch(`${API_URL}/budgets`);
+        return response.ok;
+    } catch (error) {
+        console.error('API не доступен:', error);
+        return false;
+    }
+}
+
+// Периодическое обновление каждые 30 секунд (опционально)
+setInterval(() => {
+    if (document.visibilityState === 'visible') {
+        loadBudgets();
+        loadTransactions();
+    }
+}, 30000);
