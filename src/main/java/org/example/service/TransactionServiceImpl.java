@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,20 +29,18 @@ public class TransactionServiceImpl implements TransactionService{
     @Override
     public void addTransaction(TransactionRequest request) {
 
+        Budget budget = budgetRepository.findById(request.getBudgetId())
+                .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
+
         Transaction transaction = transactionMapper.toEntity(request);
+        transaction.setAccount(budget.getAccount());
 
-        Optional<Budget> budgetOptional = budgetRepository.findCurrentByAccount(transaction.getAccount());
+        if(transactionRepository.sumAmountByBudgetId(budget.getId()) + transaction.getAmount() > budget.getLimitAmount()){
 
-        if(budgetOptional.isPresent()){
-
-            Budget budget = budgetOptional.get();
-
-            if(transactionRepository.sumAmountByBudgetId(budget.getId()) + transaction.getAmount() > budget.getLimitAmount()){
-                throw new ExceedingBudgetException("The cost is more then the limit.");
-            }
-
-            transaction.setBudget(budget);
+            throw new ExceedingBudgetException("The cost is more then the limit.");
         }
+
+        transaction.setBudget(budget);
 
         transactionRepository.save(transaction);
 
@@ -53,10 +50,12 @@ public class TransactionServiceImpl implements TransactionService{
     @Override
     public void deleteTransaction(Long id) {
 
-        Transaction transaction = transactionRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Transaction not found. No transaction with this ID."));
-
-        transactionRepository.deleteById(id);
+        if(transactionRepository.existsById(id)){
+            transactionRepository.deleteById(id);
+        }
+        else {
+            throw new ResourceNotFoundException("No transaction with this id.");
+        }
 
     }
 
@@ -88,20 +87,13 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional(readOnly = true)
     @Override
-    public List<TransactionResponse> getAllByBudgetAccountAndCategory(String budgetAccount, String category, LocalDate date) {
+    public List<TransactionResponse> getAllByBudgetId(Long budgetId) {
 
-        if(date == null){
-            List<Transaction> transactions = transactionRepository.
-                    findAllByCurrentBudgetAccountAndCategory(budgetAccount, category);
-
-            return transactions.stream().map(transactionMapper::toResponse).toList();
-        }
-
-        List<Transaction> transactions = transactionRepository.
-                findAllByBudgetAccountCategoryAndDate(budgetAccount, category, date);
+        List<Transaction> transactions = transactionRepository.findAllByBudgetId(budgetId);
 
         return transactions.stream().map(transactionMapper::toResponse).toList();
     }
+
 
     @Transactional(readOnly = true)
     @Override

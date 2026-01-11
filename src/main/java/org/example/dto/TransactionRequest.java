@@ -10,8 +10,8 @@ public class TransactionRequest {
     @NotNull
     private Long amount;
 
-    @NotBlank
-    private String account;
+    @NotNull
+    private Long budgetId;
 
     @NotBlank
     private String category;

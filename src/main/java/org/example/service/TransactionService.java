@@ -18,7 +18,7 @@ public interface TransactionService {
 
     List<TransactionResponse> getAllByCategory(String category);
 
-    List<TransactionResponse> getAllByBudgetAccountAndCategory(String budgetAccount, String category, LocalDate date);
+    List<TransactionResponse> getAllByBudgetId(Long budgetId);
 
     List<TransactionResponse> getAllByBudgetIdAndCategory(Long budgetId, String category);
 

@@ -19,59 +19,31 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
-    /**
-     * POST /api/transactions
-     * Создание новой транзакции
-     * В теле запроса передается TransactionRequest с amount и category
-     * Возвращает статус 201 (Created)
-     */
+
     @PostMapping
     public ResponseEntity<Void> addTransaction(@Valid @RequestBody TransactionRequest request) {
         transactionService.addTransaction(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    /**
-     * DELETE /api/transactions/{id}
-     * Удаление транзакции по ID
-     * Возвращает статус 204 (No Content) при успехе
-     * Возвращает 404 (Not Found) если транзакция не существует
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
         transactionService.deleteTransaction(id);
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * GET /api/transactions
-     * Получение всех транзакций
-     * Возвращает список TransactionResponse со статусом 200 (OK)
-     */
     @GetMapping
     public ResponseEntity<List<TransactionResponse>> getAllTransactions() {
         List<TransactionResponse> transactions = transactionService.getAllTransactions();
         return ResponseEntity.ok(transactions);
     }
 
-    /**
-     * GET /api/transactions/category/{category}
-     * Получение транзакций по категории
-     * {category} передается в URL (например, /category/Еда)
-     * Возвращает список TransactionResponse или пустой список []
-     */
     @GetMapping("/account/{account}")
     public ResponseEntity<List<TransactionResponse>> getAllByAccount(@PathVariable String account) {
         List<TransactionResponse> transactions = transactionService.getAllByAccount(account);
         return ResponseEntity.ok(transactions);
     }
 
-    /**
-     * GET /api/transactions/{id}
-     * Получение одной транзакции по ID
-     * Возвращает TransactionResponse со статусом 200 (OK)
-     * Возвращает 404 (Not Found) если транзакция не существует
-     */
     @GetMapping("/{id}")
     public ResponseEntity<TransactionResponse> getById(@PathVariable Long id) {
         TransactionResponse transaction = transactionService.getById(id);
@@ -99,17 +71,13 @@ public class TransactionController {
         return ResponseEntity.ok(transactions);
     }
 
-    @GetMapping("budgetAccount/{budgetAccount}/category/{category}")
-    public ResponseEntity<List<TransactionResponse>> getAllByBudgetAccountAndCategory(
-            @PathVariable String budgetAccount, @PathVariable String category,
-            @RequestParam(required = false) LocalDate date){
-        List<TransactionResponse> transactions = transactionService.getAllByBudgetAccountAndCategory(budgetAccount, category, date);
-
-        return ResponseEntity.ok(transactions);
+    @GetMapping("/budgetId/{budgetId}")
+    public ResponseEntity<List<TransactionResponse>> getAllByBudgetId(@PathVariable Long budgetId){
+        return ResponseEntity.ok(transactionService.getAllByBudgetId(budgetId));
     }
 
-    @GetMapping("/budgetId/{budgetId}/category/{category")
-    public ResponseEntity<List<TransactionResponse>> getAllByBudgetIdAndCategory(Long budgetId, String category){
+    @GetMapping("/budgetId/{budgetId}/category/{category}")
+    public ResponseEntity<List<TransactionResponse>> getAllByBudgetIdAndCategory(@PathVariable Long budgetId, @PathVariable String category){
         return ResponseEntity.ok(transactionService.getAllByBudgetIdAndCategory(budgetId, category));
     }
 }
