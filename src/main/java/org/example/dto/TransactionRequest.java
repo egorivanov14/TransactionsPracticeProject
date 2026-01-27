@@ -8,6 +8,9 @@ import lombok.Data;
 public class TransactionRequest {
 
     @NotNull
+    private Long userId;
+
+    @NotNull
     private Long amount;
 
     @NotNull

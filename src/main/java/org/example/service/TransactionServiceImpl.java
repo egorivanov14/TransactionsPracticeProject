@@ -10,6 +10,7 @@ import org.example.exception.ResourceNotFoundException;
 import org.example.mapper.TransactionMapper;
 import org.example.repository.BudgetRepository;
 import org.example.repository.TransactionRepository;
+import org.example.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class TransactionServiceImpl implements TransactionService{
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
     private final BudgetRepository budgetRepository;
+    private final UserRepository userRepository;
 
 
     @Transactional
@@ -33,7 +35,6 @@ public class TransactionServiceImpl implements TransactionService{
                 .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
 
         Transaction transaction = transactionMapper.toEntity(request);
-        transaction.setAccount(budget.getAccount());
 
         if(transactionRepository.sumAmountByBudgetId(budget.getId()) + transaction.getAmount() > budget.getLimitAmount()){
 
@@ -41,6 +42,8 @@ public class TransactionServiceImpl implements TransactionService{
         }
 
         transaction.setBudget(budget);
+        transaction.setUser(userRepository.findById(
+                request.getUserId()).orElseThrow(() -> new ResourceNotFoundException("No user with this id.")));
 
         transactionRepository.save(transaction);
 
@@ -70,6 +73,7 @@ public class TransactionServiceImpl implements TransactionService{
     @Transactional(readOnly = true)
     @Override
     public List<TransactionResponse> getAllByAccount(String account) {
+
         List<Transaction> transactions = transactionRepository.findAllByAccount(account);
 
         return transactions.stream().map(transactionMapper::toResponse).toList();

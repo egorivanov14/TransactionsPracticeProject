@@ -7,7 +7,6 @@ spring:
     username: admin
     password: Qwnmzxop10
 
-
   jpa:
     hibernate:
       ddl-auto: update

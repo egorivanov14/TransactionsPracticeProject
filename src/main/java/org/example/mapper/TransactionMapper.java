@@ -11,7 +11,6 @@ public interface TransactionMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "account", ignore = true)
     Transaction toEntity(TransactionRequest request);
 
     TransactionResponse toResponse(Transaction transaction);

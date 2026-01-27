@@ -12,7 +12,8 @@ import java.util.List;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    List<Transaction> findAllByAccount(String account);
+    @Query("SELECT t FROM Transaction t WHERE t.budget.account = :account")
+    List<Transaction> findAllByAccount(@Param("account") String account);
 
     List<Transaction> findAllByCategory(String category);
 

@@ -22,9 +22,6 @@ public class Transaction {
     private Long amount;
 
     @Column(nullable = false)
-    private String account;
-
-    @Column(nullable = false)
     private String category;
 
     @Column(nullable = false, updatable = false)
@@ -34,11 +31,13 @@ public class Transaction {
     @JoinColumn(name = "budget_id")
     private Budget budget;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @PrePersist
     protected void onCreate(){
         createdAt = LocalDate.now();
     }
 
 }
-
-
