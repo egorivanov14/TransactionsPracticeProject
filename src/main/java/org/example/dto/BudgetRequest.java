@@ -8,9 +8,6 @@ import lombok.Data;
 @Data
 public class BudgetRequest {
 
-    @NotNull
-    private Long userId;
-
     @NotBlank
     private String account;
 

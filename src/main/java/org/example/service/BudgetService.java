@@ -7,21 +7,20 @@ import java.util.List;
 
 public interface BudgetService {
 
-    void addBudget(BudgetRequest request);
+    void addBudget(BudgetRequest request, String email);
 
-    void deleteBudgetById(Long id);
+    void deleteBudgetById(Long id, String email);
 
+    List<BudgetResponse> getAllBudgetsByUser(String email);
 
-    List<BudgetResponse> getAllBudgets();
+    BudgetResponse getBudgetByIdAndUser(Long budgetId, String email);
 
-    BudgetResponse getBudgetById(Long budgetId);
+    Long getSpendAmountByBudgetIdAndUser(Long id, String email);
 
-    Long getSpendAmountByBudgetId(Long id);
+    void changeLimitAmount(Long budgetId, Long newLimitAmount, String email);
 
-    void changeLimitAmount(Long budgetId, Long newLimitAmount);
+    void changeAccount(Long budgetId, String newAccount, String email);
 
-    void changeAccount(Long budgetId, String newAccount);
-
-    Long getBudgetRemains(Long budgetId);
+    Long getBudgetRemains(Long budgetId, String email);
 
 }

@@ -27,13 +27,6 @@ public class Budget {
     @Column(nullable = false)
     private LocalDate startDate;
 
-//    @Column(nullable = false)
-//    private LocalDate endDate;
-
-//    @Enumerated(EnumType.STRING)
-//    @Column(nullable = false)
-//    private PeriodType periodType;
-
     @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions = new ArrayList<>();
 
@@ -41,33 +34,11 @@ public class Budget {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-
     @PrePersist
     protected void onCreate(){
         startDate = LocalDate.now();
     }
 
-//    @PrePersist
-//    protected void onCreate(){
-//
-//        if(periodType == null){
-//            periodType = PeriodType.MONTHLY;
-//        }
-//
-//        if(endDate == null){
-//
-//            if(PeriodType.MONTHLY.equals(periodType)){
-//                endDate = LocalDate.now().plusMonths(1);
-//            }
-//            else if(PeriodType.WEEKLY.equals(periodType)){
-//                endDate = LocalDate.now().plusWeeks(1);
-//            }
-//            else if(PeriodType.DAILY.equals(periodType)){
-//                endDate = LocalDate.now().plusDays(1);
-//            }
-//        }
-//
-//    }
 
 }
 

@@ -8,24 +8,24 @@ import java.util.List;
 
 public interface TransactionService {
 
-    void addTransaction(TransactionRequest request);
+    void addTransaction(TransactionRequest request, String email);
 
-    void deleteTransaction(Long id);
+    void deleteTransaction(Long id, String email);
 
-    List<TransactionResponse> getAllTransactions();
+    List<TransactionResponse> getAllTransactionsByUser(String email);
 
-    List<TransactionResponse> getAllByAccount(String account);
+    List<TransactionResponse> getAllByAccountAndUser(String account, String email);
 
-    List<TransactionResponse> getAllByCategory(String category);
+    List<TransactionResponse> getAllByCategoryAndUser(String category, String email);
 
-    List<TransactionResponse> getAllByBudgetId(Long budgetId);
+    List<TransactionResponse> getAllByBudgetIdAndUser(Long budgetId, String email);
 
-    List<TransactionResponse> getAllByBudgetIdAndCategory(Long budgetId, String category);
+    List<TransactionResponse> getAllByBudgetIdAndCategoryAndUser(Long budgetId, String category, String email);
 
-    TransactionResponse getById(Long id);
+    TransactionResponse getByIdAndUser(Long id, String email);
 
-    List<TransactionResponse> getAllByAmount(Long amount);
+    List<TransactionResponse> getAllByAmountAndUser(Long amount, String email);
 
-    List<TransactionResponse> getAllByCreatedAt(LocalDate createdAt);
+    List<TransactionResponse> getAllByCreatedAtAndUser(LocalDate createdAt, String email);
 
 }

@@ -25,5 +25,5 @@ public interface UserService {
 
     UserDto getUserByEmail(String email);
 
-    UserDto getUserByUserName(String userName);
+    UserDto getUserByName(String name);
 }

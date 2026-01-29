@@ -12,23 +12,36 @@ import java.util.List;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    @Query("SELECT t FROM Transaction t WHERE t.budget.account = :account")
-    List<Transaction> findAllByAccount(@Param("account") String account);
+    @Query("SELECT t FROM Transaction t WHERE t.budget.account = :account " +
+            "AND t.user.email = :email")
+    List<Transaction> findAllByAccountAndUser(@Param("account") String account, @Param("email") String email);
 
-    List<Transaction> findAllByCategory(String category);
+    @Query("SELECT t FROM Transaction t WHERE t.category = :category " +
+            "AND t.user.email = :email")
+    List<Transaction> findAllByCategoryAndUser(@Param("category") String category, @Param("email") String email);
 
-    List<Transaction> findAllByCreatedAt(LocalDate createdAt);
+    @Query("SELECT t FROM Transaction t WHERE t.createdAt = :createdAt " +
+            "AND t.user.email = :email")
+    List<Transaction> findAllByCreatedAtAndUser(@Param("createdAt") LocalDate createdAt, @Param("email") String email);
 
-    List<Transaction> findAllByAmount(Long amount);
-
-    @Query("SELECT t FROM Transaction t WHERE t.budget.id = :budgetId")
-    List<Transaction> findAllByBudgetId(@Param("budgetId") Long budgetId);
-
-    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.budget.id = :budgetId")
-    Long sumAmountByBudgetId(@Param("budgetId") Long budgetId);
+    @Query("SELECT t FROM Transaction t WHERE t.amount = :amount " +
+            "AND t.user.email = :email")
+    List<Transaction> findAllByAmountAndUser(@Param("amount") Long amount, @Param("email") String email);
 
     @Query("SELECT t FROM Transaction t WHERE t.budget.id = :budgetId " +
-            "AND t.category = :category ")
-    List<Transaction> findAllByBudgetIdAndCategory(
-            @Param("budgetId") Long budgetId, @Param("category") String category);
+            "AND t.user.email = :email")
+    List<Transaction> findAllByBudgetIdAndUser(@Param("budgetId") Long budgetId, @Param("email") String email);
+
+    @Query("SELECT t FROM Transaction t WHERE t.user.email = :email")
+    List<Transaction> findAllByUser(@Param("email") String email);
+
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.budget.id = :budgetId " +
+            "AND t.user.email = :email")
+    Long sumAmountByBudgetId(@Param("budgetId") Long budgetId, @Param("email") String email);
+
+    @Query("SELECT t FROM Transaction t WHERE t.budget.id = :budgetId " +
+            "AND t.category = :category " +
+            "AND t.user.email = :email")
+    List<Transaction> findAllByBudgetIdAndCategoryAndUser(
+            @Param("budgetId") Long budgetId, @Param("category") String category, @Param("email") String email);
 }

@@ -5,6 +5,7 @@ import org.example.dto.TransactionRequest;
 import org.example.dto.TransactionResponse;
 import org.example.entity.Budget;
 import org.example.entity.Transaction;
+import org.example.exception.AccessDeniedException;
 import org.example.exception.ExceedingBudgetException;
 import org.example.exception.ResourceNotFoundException;
 import org.example.mapper.TransactionMapper;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,32 +31,46 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional
     @Override
-    public void addTransaction(TransactionRequest request) {
+    public void addTransaction(TransactionRequest request, String email) {
 
         Budget budget = budgetRepository.findById(request.getBudgetId())
                 .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
 
-        Transaction transaction = transactionMapper.toEntity(request);
+        if(budget.getUser().getEmail().equals(email)){
+            Transaction transaction = transactionMapper.toEntity(request);
 
-        if(transactionRepository.sumAmountByBudgetId(budget.getId()) + transaction.getAmount() > budget.getLimitAmount()){
+            if(transactionRepository.sumAmountByBudgetId(budget.getId(), email) + transaction.getAmount()
+                    > budget.getLimitAmount()){
 
-            throw new ExceedingBudgetException("The cost is more then the limit.");
+                throw new ExceedingBudgetException("The cost is more then the limit.");
+            }
+
+            transaction.setBudget(budget);
+            transaction.setUser(userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found")));
+
+            transactionRepository.save(transaction);
         }
-
-        transaction.setBudget(budget);
-        transaction.setUser(userRepository.findById(
-                request.getUserId()).orElseThrow(() -> new ResourceNotFoundException("No user with this id.")));
-
-        transactionRepository.save(transaction);
-
+        else {
+            throw new AccessDeniedException("Not your budget.");
+        }
     }
 
     @Transactional
     @Override
-    public void deleteTransaction(Long id) {
+    public void deleteTransaction(Long id, String email) {
 
-        if(transactionRepository.existsById(id)){
-            transactionRepository.deleteById(id);
+        Optional<Transaction> transactionOptional = transactionRepository.findById(id);
+
+        if(transactionOptional.isPresent()){
+            Transaction transaction = transactionOptional.get();
+
+            if(transaction.getUser().getEmail().equals(email)){
+                transactionRepository.deleteById(id);
+            }
+            else {
+                throw new AccessDeniedException("This transaction not for this user.");
+            }
         }
         else {
             throw new ResourceNotFoundException("No transaction with this id.");
@@ -64,17 +80,17 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional(readOnly = true)
     @Override
-    public List<TransactionResponse> getAllTransactions() {
-        List<Transaction> transactions = transactionRepository.findAll();
+    public List<TransactionResponse> getAllTransactionsByUser(String email) {
+        List<Transaction> transactions = transactionRepository.findAllByUser(email);
 
         return transactions.stream().map(transactionMapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<TransactionResponse> getAllByAccount(String account) {
+    public List<TransactionResponse> getAllByAccountAndUser(String account, String email) {
 
-        List<Transaction> transactions = transactionRepository.findAllByAccount(account);
+        List<Transaction> transactions = transactionRepository.findAllByAccountAndUser(account, email);
 
         return transactions.stream().map(transactionMapper::toResponse).toList();
 
@@ -82,46 +98,53 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional(readOnly = true)
     @Override
-    public List<TransactionResponse> getAllByCategory(String category) {
+    public List<TransactionResponse> getAllByCategoryAndUser(String category, String email) {
 
-        List<Transaction> transactions = transactionRepository.findAllByCategory(category);
-
-        return transactions.stream().map(transactionMapper::toResponse).toList();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<TransactionResponse> getAllByBudgetId(Long budgetId) {
-
-        List<Transaction> transactions = transactionRepository.findAllByBudgetId(budgetId);
-
-        return transactions.stream().map(transactionMapper::toResponse).toList();
-    }
-
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<TransactionResponse> getAllByBudgetIdAndCategory(Long budgetId, String category) {
-
-        List<Transaction> transactions = transactionRepository.findAllByBudgetIdAndCategory(budgetId, category);
+        List<Transaction> transactions = transactionRepository.findAllByCategoryAndUser(category, email);
 
         return transactions.stream().map(transactionMapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public TransactionResponse getById(Long id) {
+    public List<TransactionResponse> getAllByBudgetIdAndUser(Long budgetId, String email) {
+
+        List<Transaction> transactions = transactionRepository.findAllByBudgetIdAndUser(budgetId, email);
+
+        return transactions.stream().map(transactionMapper::toResponse).toList();
+    }
+
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<TransactionResponse> getAllByBudgetIdAndCategoryAndUser(
+            Long budgetId, String category, String email) {
+
+        List<Transaction> transactions = transactionRepository.findAllByBudgetIdAndCategoryAndUser(budgetId, category, email);
+
+        return transactions.stream().map(transactionMapper::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public TransactionResponse getByIdAndUser(Long id, String email) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found. No transaction with this ID."));
 
-        return transactionMapper.toResponse(transaction);
+        if(transaction.getUser().getEmail().equals(email)){
+            return transactionMapper.toResponse(transaction);
+        }
+        else {
+            throw new AccessDeniedException("Not your transaction");
+        }
+
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<TransactionResponse> getAllByAmount(Long amount) {
+    public List<TransactionResponse> getAllByAmountAndUser(Long amount, String email) {
 
-        List<Transaction> transactions = transactionRepository.findAllByAmount(amount);
+        List<Transaction> transactions = transactionRepository.findAllByAmountAndUser(amount, email);
 
         return transactions.stream().map(transactionMapper::toResponse).toList();
 
@@ -129,9 +152,9 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional(readOnly = true)
     @Override
-    public List<TransactionResponse> getAllByCreatedAt(LocalDate createdAt) {
+    public List<TransactionResponse> getAllByCreatedAtAndUser(LocalDate createdAt, String email) {
 
-        List<Transaction> transactions = transactionRepository.findAllByCreatedAt(createdAt);
+        List<Transaction> transactions = transactionRepository.findAllByCreatedAtAndUser(createdAt, email);
 
         return transactions.stream().map(transactionMapper::toResponse).toList();
     }

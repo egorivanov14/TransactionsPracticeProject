@@ -3,10 +3,10 @@ package org.example.service;
 import lombok.RequiredArgsConstructor;
 import org.example.config.JwtService;
 import org.example.dto.*;
+import org.example.entity.Role;
 import org.example.entity.User;
 import org.example.exception.DuplicateResourceException;
 import org.example.exception.ResourceNotFoundException;
-import org.example.exception.WrongDataException;
 import org.example.mapper.UserMapper;
 import org.example.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,11 +34,10 @@ public class UserServiceImpl implements UserService{
             throw new DuplicateResourceException("User with this email already exists.");
         }
 
-        User user = new User();
+        User user = userMapper.toEntity(request);
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setUserName(request.getUserName());
-        user.setEmail(request.getEmail());
+        user.setRole(Role.USER);
 
         userRepository.save(user);
 
@@ -89,13 +88,13 @@ public class UserServiceImpl implements UserService{
 
         if(userOptional.isPresent()){
 
-            if(userRepository.existsByUserName(newName)){
+            if(userRepository.existsByName(newName)){
                 throw new DuplicateResourceException("User with this name already exists.");
             }
 
             User user = userOptional.get();
 
-            user.setUserName(newName);
+            user.setName(newName);
             userRepository.save(user);
         }
         else {
@@ -167,9 +166,9 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserDto getUserByUserName(String userName) {
+    public UserDto getUserByName(String name) {
 
-        User user = userRepository.findByUserName(userName)
+        User user = userRepository.findByName(name)
                 .orElseThrow(() -> new ResourceNotFoundException("No user with this UserName."));
 
         return userMapper.toDto(user);

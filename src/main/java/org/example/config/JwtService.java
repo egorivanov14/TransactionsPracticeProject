@@ -16,7 +16,7 @@ import java.util.Date;
 public class JwtService {
 
     private static final String SECRET_KEY = "43ffe90d15f0d47a9aa67b7ed522db7d2c539a4c2f284a4884a0c01b42d33e3f";
-    private final long EXPIRATION_TIME = 86400000;
+    private final long EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7;
 
     private SecretKey getSignInKey() {
 
@@ -30,7 +30,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(user.getEmail())
                 .claim("userId", user.getId())
-                .issuedAt(new Date())
+                .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(getSignInKey())
                 .compact();
@@ -55,13 +55,13 @@ public class JwtService {
             if(claims.getExpiration().before(new Date())){
                 return false;
             }
-
             return true;
         }
         catch (JwtException e){
             return false;
         }
     }
+
 
     public String getEmailFromToken(String token){
         Claims claims = Jwts.parser()

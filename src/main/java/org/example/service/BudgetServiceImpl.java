@@ -5,9 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.dto.BudgetRequest;
 import org.example.dto.BudgetResponse;
 import org.example.entity.Budget;
-import org.example.exception.DuplicateResourceException;
+import org.example.exception.AccessDeniedException;
 import org.example.exception.ResourceNotFoundException;
-import org.example.exception.WrongDataException;
 import org.example.mapper.BudgetMapper;
 import org.example.repository.BudgetRepository;
 import org.example.repository.TransactionRepository;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,11 +27,11 @@ public class BudgetServiceImpl implements BudgetService {
 
     @Transactional
     @Override
-    public void addBudget(BudgetRequest request) {
+    public void addBudget(BudgetRequest request, String email) {
 
         Budget budget = budgetMapper.toEntity(request);
 
-        budget.setUser(userRepository.findById(request.getUserId()).
+        budget.setUser(userRepository.findByEmail(email).
                 orElseThrow(() -> new ResourceNotFoundException("No user with this id.")));
 
         budgetRepository.save(budget);
@@ -42,83 +40,100 @@ public class BudgetServiceImpl implements BudgetService {
 
     @Transactional
     @Override
-    public void deleteBudgetById(Long id) {
+    public void deleteBudgetById(Long id, String email) {
 
-        if (budgetRepository.existsById(id)) {
+        Budget budget = budgetRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
+
+        if (budget.getUser().getEmail().equals(email)) {
             budgetRepository.deleteById(id);
         } else {
-            throw new ResourceNotFoundException("No budget with this id.");
+            throw new AccessDeniedException("Not your budget.");
         }
+
     }
 
 
     @Transactional
     @Override
-    public List<BudgetResponse> getAllBudgets() {
+    public List<BudgetResponse> getAllBudgetsByUser(String email) {
 
-        List<Budget> budgets = budgetRepository.findAll();
+        List<Budget> budgets = budgetRepository.findAllByUser(email);
 
         return budgets.stream().map(budgetMapper::toResponse).toList();
     }
 
     @Transactional
     @Override
-    public BudgetResponse getBudgetById(Long budgetId) {
+    public BudgetResponse getBudgetByIdAndUser(Long budgetId, String email) {
 
-        Budget budget = budgetRepository.findById(budgetId)
-                .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
+        Budget budget = budgetRepository.findByBudgetIdAndUser(budgetId, email)
+                .orElseThrow(() -> new ResourceNotFoundException("No budget with this id or it is not your budget."));
 
         return budgetMapper.toResponse(budget);
     }
 
     @Transactional
     @Override
-    public Long getSpendAmountByBudgetId(Long id) {
+    public Long getSpendAmountByBudgetIdAndUser(Long id, String email) {
 
-        if (budgetRepository.existsById(id)) {
-            return transactionRepository.sumAmountByBudgetId(id);
+
+        Budget budget = budgetRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
+
+        if (budget.getUser().getEmail().equals(email)) {
+            return transactionRepository.sumAmountByBudgetId(id, email);
         } else {
-            throw new ResourceNotFoundException("No budget with this id.");
+            throw new AccessDeniedException("Not your budget.");
         }
+
     }
 
     @Transactional
     @Override
-    public void changeLimitAmount(Long budgetId, Long newLimitAmount) {
+    public void changeLimitAmount(Long budgetId, Long newLimitAmount, String email) {
 
         Budget budget = budgetRepository.findById(budgetId)
                 .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
 
-        budget.setLimitAmount(newLimitAmount);
-        budgetRepository.save(budget);
-
-    }
-
-    @Transactional
-    @Override
-    public void changeAccount(Long budgetId, String newAccount) {
-
-        Optional<Budget> budgetOptional = budgetRepository.findById(budgetId);
-
-        if(budgetOptional.isPresent()){
-            Budget budget = budgetOptional.get();
-
-            budget.setAccount(newAccount);
-
+        if(budget.getUser().getEmail().equals(email)){
+            budget.setLimitAmount(newLimitAmount);
             budgetRepository.save(budget);
         }
         else {
-            throw new ResourceNotFoundException("No budget with this id.");
+            throw new AccessDeniedException("Not your budget.");
         }
     }
 
     @Transactional
     @Override
-    public Long getBudgetRemains(Long budgetId) {
+    public void changeAccount(Long budgetId, String newAccount, String email) {
+
         Budget budget = budgetRepository.findById(budgetId)
                 .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
 
-        return budget.getLimitAmount() - transactionRepository.sumAmountByBudgetId(budgetId);
+        if(budget.getUser().getEmail().equals(email)){
+
+            budget.setAccount(newAccount);
+            budgetRepository.save(budget);
+        }
+        else {
+            throw new AccessDeniedException("Not your budget.");
+        }
+    }
+
+    @Transactional
+    @Override
+    public Long getBudgetRemains(Long budgetId, String email) {
+        Budget budget = budgetRepository.findById(budgetId)
+                .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
+
+        if(budget.getUser().getEmail().equals(email)){
+            return budget.getLimitAmount() - transactionRepository.sumAmountByBudgetId(budgetId, email);
+        }
+        else {
+            throw new AccessDeniedException("Not your budget.");
+        }
     }
 }
 
