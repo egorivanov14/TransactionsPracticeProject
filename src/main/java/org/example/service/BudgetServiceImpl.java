@@ -31,20 +31,6 @@ public class BudgetServiceImpl implements BudgetService {
     @Override
     public void addBudget(BudgetRequest request) {
 
-//        if (budgetRepository.existsCurrentByAccount(request.getAccount()) ||
-//                budgetRepository.existsByAccountAndDate(request.getAccount(), request.getStartDate())) {
-//            throw new DuplicateResourceException("Budget with this account already exists.");
-//        } else {
-//            Budget budget = budgetMapper.toEntity(request);
-//
-//            if (budget.getEndDate() != null && budget.getEndDate().isBefore(budget.getStartDate())) {
-//                throw new WrongDataException("EndDate must be after startDate.");
-//            }
-//
-//            budgetRepository.save(budget);
-//
-//        }
-
         Budget budget = budgetMapper.toEntity(request);
 
         budget.setUser(userRepository.findById(request.getUserId()).
@@ -111,18 +97,6 @@ public class BudgetServiceImpl implements BudgetService {
     @Transactional
     @Override
     public void changeAccount(Long budgetId, String newAccount) {
-
-
-//        if (budgetRepository.existsCurrentByAccount(newAccount)) {
-//            throw new DuplicateResourceException("Budget with this new account already exists.");
-//        } else {
-//            Budget budget = budgetRepository.findById(budgetId)
-//                    .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
-//
-//            budget.setAccount(newAccount);
-//            budgetRepository.save(budget);
-//
-//        }
 
         Optional<Budget> budgetOptional = budgetRepository.findById(budgetId);
 

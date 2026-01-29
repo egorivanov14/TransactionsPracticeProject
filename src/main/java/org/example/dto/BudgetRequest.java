@@ -18,12 +18,4 @@ public class BudgetRequest {
     @Min(0L)
     private Long limitAmount;
 
-//    @NotNull
-//    private LocalDate startDate;
-
-//    private LocalDate endDate;
-//
-//    private PeriodType periodType;
-
-
 }

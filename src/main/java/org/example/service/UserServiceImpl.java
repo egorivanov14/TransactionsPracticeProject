@@ -1,13 +1,12 @@
 package org.example.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.dto.LoginRequest;
-import org.example.dto.RegisterRequest;
-import org.example.dto.RegisterResponse;
-import org.example.dto.UserDto;
+import org.example.config.JwtService;
+import org.example.dto.*;
 import org.example.entity.User;
 import org.example.exception.DuplicateResourceException;
 import org.example.exception.ResourceNotFoundException;
+import org.example.exception.WrongDataException;
 import org.example.mapper.UserMapper;
 import org.example.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +24,7 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Transactional
     @Override
@@ -42,19 +42,31 @@ public class UserServiceImpl implements UserService{
 
         userRepository.save(user);
 
-        return userMapper.toResponse(user);
+        String token = jwtService.generateToken(user);
+
+        RegisterResponse response = userMapper.toResponse(user);
+        response.setToken(token);
+
+        return response;
     }
 
     @Transactional
     @Override
-    public void login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
 
-        if(userRepository.existsByUserName(request.getUserName())){
-            return;
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(()->new ResourceNotFoundException("No user with this email."));
+
+        if(passwordEncoder.matches(request.getPassword(), user.getPassword())){
+
+            String token = jwtService.generateToken(user);
+
+            return new LoginResponse(token, user.getId(), user.getEmail());
         }
-        else {
-            throw new ResourceNotFoundException("No user with this UserName.");
+        else{
+            throw new RuntimeException("Invalid password.");
         }
+
     }
 
     @Transactional
@@ -147,28 +159,20 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserDto getUserByEmail(String email) {
 
-        try {
-            User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("No user with this email."));
 
-            return userMapper.toDto(user);
-        }
-        catch (Exception exception){
-            throw new ResourceNotFoundException("No user with this email.");
-        }
+        return userMapper.toDto(user);
 
     }
 
     @Override
     public UserDto getUserByUserName(String userName) {
 
-        try{
-            User user = userRepository.findByUserName(userName);
+        User user = userRepository.findByUserName(userName)
+                .orElseThrow(() -> new ResourceNotFoundException("No user with this UserName."));
 
-            return userMapper.toDto(user);
-        } catch (Exception exception){
-            throw new ResourceNotFoundException("No user with this UserName.");
-        }
-
-
+        return userMapper.toDto(user);
     }
+
 }

@@ -8,8 +8,8 @@ import lombok.Data;
 public class LoginRequest {
 
     @NotBlank
-    @Size(min = 3, max = 50)
-    private String userName;
+    @Size(max = 50)
+    private String email;
 
     @NotBlank
     @Size(min = 6)

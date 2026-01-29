@@ -10,15 +10,10 @@ public class BudgetResponse {
 
     private Long id;
 
-    private Long userId;
-
     private String account;
 
     private Long limitAmount;
 
     private LocalDate startDate;
-//
-//    private LocalDate endDate;
-//
-//    private PeriodType periodType;
+
 }

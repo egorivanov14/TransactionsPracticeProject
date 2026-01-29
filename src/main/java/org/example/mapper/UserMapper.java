@@ -1,9 +1,6 @@
 package org.example.mapper;
 
-import org.example.dto.LoginRequest;
-import org.example.dto.RegisterRequest;
-import org.example.dto.RegisterResponse;
-import org.example.dto.UserDto;
+import org.example.dto.*;
 import org.example.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,6 +19,7 @@ public interface UserMapper {
     @Mapping(target = "email", ignore = true)
     User toEntity(LoginRequest request);
 
+    @Mapping(target = "token", ignore = true)
     RegisterResponse toResponse(User user);
 
     UserDto toDto(User user);

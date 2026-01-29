@@ -1,10 +1,7 @@
 package org.example.service;
 
 
-import org.example.dto.LoginRequest;
-import org.example.dto.RegisterRequest;
-import org.example.dto.RegisterResponse;
-import org.example.dto.UserDto;
+import org.example.dto.*;
 
 import java.util.List;
 
@@ -12,7 +9,7 @@ public interface UserService {
 
     RegisterResponse register(RegisterRequest request);
 
-    void login(LoginRequest request);
+    LoginResponse login(LoginRequest request);
 
     void deleteUser(Long userId);
 

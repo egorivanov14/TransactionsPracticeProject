@@ -2,8 +2,7 @@ package org.example.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.dto.RegisterRequest;
-import org.example.dto.UserDto;
+import org.example.dto.*;
 import org.example.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +17,14 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
-    public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequest request){
-        userService.register(request);
+    @PostMapping("/register")
+    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request){
+        return ResponseEntity.ok(userService.register(request));
+    }
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request){
+        return ResponseEntity.ok(userService.login(request));
     }
 
     @DeleteMapping("{userId}")

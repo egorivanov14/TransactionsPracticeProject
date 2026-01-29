@@ -6,7 +6,7 @@ spring:
     url: jdbc:postgresql://localhost:5551/finance_db
     username: admin
     password: Qwnmzxop10
-
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
@@ -14,3 +14,5 @@ spring:
     properties:
       hibernate:
         format_sql: true
+    database: postgresql
+    database- platform: org.hibernate.dialect.PostgreSQLDialect
