@@ -1,10 +1,11 @@
 package org.example.service;
 
-
 import lombok.RequiredArgsConstructor;
 import org.example.dto.BudgetRequest;
 import org.example.dto.BudgetResponse;
 import org.example.entity.Budget;
+import org.example.entity.Role;
+import org.example.entity.User;
 import org.example.exception.AccessDeniedException;
 import org.example.exception.ResourceNotFoundException;
 import org.example.mapper.BudgetMapper;
@@ -31,10 +32,13 @@ public class BudgetServiceImpl implements BudgetService {
 
         Budget budget = budgetMapper.toEntity(request);
 
-        budget.setUser(userRepository.findByEmail(email).
-                orElseThrow(() -> new ResourceNotFoundException("No user with this id.")));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+
+        budget.setUser(user);
 
         budgetRepository.save(budget);
+        userRepository.save(user);
 
     }
 
@@ -52,7 +56,6 @@ public class BudgetServiceImpl implements BudgetService {
         }
 
     }
-
 
     @Transactional
     @Override
@@ -77,7 +80,6 @@ public class BudgetServiceImpl implements BudgetService {
     @Override
     public Long getSpendAmountByBudgetIdAndUser(Long id, String email) {
 
-
         Budget budget = budgetRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
 
@@ -86,7 +88,6 @@ public class BudgetServiceImpl implements BudgetService {
         } else {
             throw new AccessDeniedException("Not your budget.");
         }
-
     }
 
     @Transactional
@@ -136,4 +137,3 @@ public class BudgetServiceImpl implements BudgetService {
         }
     }
 }
-

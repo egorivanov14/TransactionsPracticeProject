@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -54,7 +53,7 @@ public class UserServiceImpl implements UserService{
     public LoginResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(()->new ResourceNotFoundException("No user with this email."));
+                .orElseThrow(()->new ResourceNotFoundException("User not found."));
 
         if(passwordEncoder.matches(request.getPassword(), user.getPassword())){
 
@@ -70,74 +69,61 @@ public class UserServiceImpl implements UserService{
 
     @Transactional
     @Override
-    public void deleteUser(Long userId) {
+    public void deleteUser(String email) {
 
-        if(userRepository.existsById(userId)){
-            userRepository.deleteById(userId);
-        }
-        else {
-            throw new ResourceNotFoundException("No user with this id.");
-        }
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+
+        userRepository.delete(user);
     }
 
     @Transactional
     @Override
-    public void changeName(Long userId, String newName) {
+    public void changeName(String newName, String email) {
 
-        Optional<User> userOptional = userRepository.findById(userId);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
-        if(userOptional.isPresent()){
-
-            if(userRepository.existsByName(newName)){
-                throw new DuplicateResourceException("User with this name already exists.");
-            }
-
-            User user = userOptional.get();
-
-            user.setName(newName);
-            userRepository.save(user);
+        if (userRepository.existsByName(newName)) {
+            throw new DuplicateResourceException("User with this name already exists.");
         }
-        else {
-            throw new ResourceNotFoundException("No user with this id.");
-        }
+
+        user.setName(newName);
+        userRepository.save(user);
     }
+
+//    @Transactional
+//    @Override
+//    public void changeEmail(Long userId, String newEmail) {
+//        Optional<User> userOptional = userRepository.findById(userId);
+//
+//        if(userOptional.isPresent()){
+//
+//            if(userRepository.existsByEmail(newEmail)){
+//                throw new DuplicateResourceException("User with this email already exists.");
+//            }
+//
+//            User user = userOptional.get();
+//
+//            user.setEmail(newEmail);
+//            userRepository.save(user);
+//        }
+//        else {
+//            throw new ResourceNotFoundException("No user with this id.");
+//        }
+//    }
 
     @Transactional
     @Override
-    public void changeEmail(Long userId, String newEmail) {
-        Optional<User> userOptional = userRepository.findById(userId);
+    public void changePassword(String newPassword, String email) {
 
-        if(userOptional.isPresent()){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
-            if(userRepository.existsByEmail(newEmail)){
-                throw new DuplicateResourceException("User with this email already exists.");
-            }
-
-            User user = userOptional.get();
-
-            user.setEmail(newEmail);
-            userRepository.save(user);
-        }
-        else {
-            throw new ResourceNotFoundException("No user with this id.");
-        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 
-    @Transactional
-    @Override
-    public void changePassword(Long userId, String newPassword) {
-        Optional<User> userOptional = userRepository.findById(userId);
-
-        if(userOptional.isPresent()){
-            User user = userOptional.get();
-
-            user.setPassword(passwordEncoder.encode(newPassword));
-            userRepository.save(user);
-        }
-        else {
-            throw new ResourceNotFoundException("No user with this id.");
-        }
-    }
 
     @Override
     public List<UserDto> getAllUsers() {
@@ -152,14 +138,14 @@ public class UserServiceImpl implements UserService{
 
         return userMapper.toDto(
                 userRepository.findById(id).orElseThrow(
-                        () -> new ResourceNotFoundException("No user with this id.")));
+                        () -> new ResourceNotFoundException("User not found.")));
     }
 
     @Override
     public UserDto getUserByEmail(String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("No user with this email."));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
         return userMapper.toDto(user);
 
@@ -169,7 +155,7 @@ public class UserServiceImpl implements UserService{
     public UserDto getUserByName(String name) {
 
         User user = userRepository.findByName(name)
-                .orElseThrow(() -> new ResourceNotFoundException("No user with this UserName."));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
         return userMapper.toDto(user);
     }

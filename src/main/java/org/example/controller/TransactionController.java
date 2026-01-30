@@ -49,7 +49,7 @@ public class TransactionController {
         return ResponseEntity.ok(transactions);
     }
 
-    @GetMapping("/account/{account}")
+    @GetMapping("/account/")
     public ResponseEntity<List<TransactionResponse>> getAllByAccountAndUser(@PathVariable String account
             , @AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
@@ -67,7 +67,7 @@ public class TransactionController {
         return ResponseEntity.ok(transaction);
     }
 
-    @GetMapping("/amount/{amount}")
+    @GetMapping("/amount/")
     public ResponseEntity<List<TransactionResponse>> getAllByAmountAndUser(@PathVariable Long amount
             , @AuthenticationPrincipal UserDetails userDetails ){
         String email = userDetails.getUsername();
@@ -77,7 +77,7 @@ public class TransactionController {
         return ResponseEntity.ok(transactions);
     }
 
-    @GetMapping("/createdAt/{createdAt}")
+    @GetMapping("/createdAt/")
     public ResponseEntity<List<TransactionResponse>> getAllByCreatedAtAndUser(@PathVariable LocalDate createdAt
             , @AuthenticationPrincipal UserDetails userDetails){
         String email = userDetails.getUsername();
@@ -87,7 +87,7 @@ public class TransactionController {
         return ResponseEntity.ok(transactions);
     }
 
-    @GetMapping("/category/{category}")
+    @GetMapping("/category/")
     public ResponseEntity<List<TransactionResponse>> getAllByCategoryAndUser(@PathVariable String category
             , @AuthenticationPrincipal UserDetails userDetails){
         String email = userDetails.getUsername();
@@ -105,7 +105,7 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.getAllByBudgetIdAndUser(budgetId, email));
     }
 
-    @GetMapping("/budgetId/{budgetId}/category/{category}")
+    @GetMapping("/budgetId/{budgetId}/category/")
     public ResponseEntity<List<TransactionResponse>> getAllByBudgetIdAndCategoryAndUser(
             @PathVariable Long budgetId,
             @PathVariable String category,

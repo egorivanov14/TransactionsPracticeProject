@@ -114,13 +114,13 @@ public class TransactionServiceImpl implements TransactionService{
         return transactions.stream().map(transactionMapper::toResponse).toList();
     }
 
-
     @Transactional(readOnly = true)
     @Override
     public List<TransactionResponse> getAllByBudgetIdAndCategoryAndUser(
             Long budgetId, String category, String email) {
 
-        List<Transaction> transactions = transactionRepository.findAllByBudgetIdAndCategoryAndUser(budgetId, category, email);
+        List<Transaction> transactions = transactionRepository
+                .findAllByBudgetIdAndCategoryAndUser(budgetId, category, email);
 
         return transactions.stream().map(transactionMapper::toResponse).toList();
     }
@@ -129,7 +129,8 @@ public class TransactionServiceImpl implements TransactionService{
     @Override
     public TransactionResponse getByIdAndUser(Long id, String email) {
         Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found. No transaction with this ID."));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Transaction not found. No transaction with this ID."));
 
         if(transaction.getUser().getEmail().equals(email)){
             return transactionMapper.toResponse(transaction);

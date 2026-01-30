@@ -4,8 +4,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.*;
 import org.example.service.UserService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,14 +29,17 @@ public class UserController {
         return ResponseEntity.ok(userService.login(request));
     }
 
-    @DeleteMapping("{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long userId){
-        userService.deleteUser(userId);
+    @DeleteMapping()
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal UserDetails userDetails){
+        String email = userDetails.getUsername();
+
+        userService.deleteUser(email);
 
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserDto>> getAllUsers(){
         List<UserDto> users = userService.getAllUsers();
 

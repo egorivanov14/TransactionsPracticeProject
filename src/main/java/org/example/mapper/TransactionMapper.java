@@ -13,6 +13,7 @@ public interface TransactionMapper {
     @Mapping(target = "createdAt", ignore = true)
     Transaction toEntity(TransactionRequest request);
 
+    @Mapping(source = "budget.account", target = "account")
     TransactionResponse toResponse(Transaction transaction);
 
 }

@@ -31,7 +31,7 @@ public class BudgetController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PutMapping("/budgetId/{budgetId}/changeLimitAmount/{newLimitAmount}")
+    @PutMapping("/budgetId/{budgetId}/limit/")
     public ResponseEntity<Void> changeLimitAmount(@PathVariable Long budgetId,
                                                   @PathVariable Long newLimitAmount,
                                                   @AuthenticationPrincipal UserDetails userDetails){
@@ -42,7 +42,7 @@ public class BudgetController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
-    @PutMapping("/budgetId/{budgetId}/changeAccount/{newAccount}")
+    @PutMapping("/budgetId/{budgetId}/account/")
     public ResponseEntity<Void> changeAccount(@PathVariable Long budgetId,
                                               @PathVariable String newAccount,
                                               @AuthenticationPrincipal UserDetails userDetails

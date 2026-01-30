@@ -1,10 +1,12 @@
 package org.example.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import java.time.LocalDateTime;
+import java.util.Map;
 
-@Data
-@AllArgsConstructor
-public class ErrorResponse {
-    String message;
-}
+public record ErrorResponse(
+        int status,
+        String message,
+        String error,
+        LocalDateTime timestamp,
+        Map<String, String> details)
+{}

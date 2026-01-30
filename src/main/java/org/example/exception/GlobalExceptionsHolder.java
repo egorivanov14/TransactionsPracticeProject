@@ -4,64 +4,97 @@ import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionsHolder {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException exception){
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage()));
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(exception.getMessage()));
-
+        return ResponseEntity.badRequest()
+                .body(new ErrorResponse(400,
+                        "Invalid input data",
+                        "Validation Failed",
+                        LocalDateTime.now(),
+                        errors));
     }
 
-    @ExceptionHandler(ExceedingBudgetException.class)
-    public ResponseEntity<ErrorResponse> handleExceedingError(ExceedingBudgetException exception){
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException exception) {
+        return ResponseEntity.status(404)
+                .body(new ErrorResponse(404,
+                        exception.getMessage(),
+                        "Not Found",
+                        LocalDateTime.now(),
+                        null));
+    }
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(exception.getMessage()));
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException exception) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(403,
+                        exception.getMessage(),
+                        "Access Denied",
+                        LocalDateTime.now(),
+                        null));
     }
 
     @ExceptionHandler(DuplicateResourceException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateError(DuplicateResourceException exception){
-
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(exception.getMessage()));
+    public ResponseEntity<ErrorResponse> handleDuplicate(DuplicateResourceException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(409,
+                        exception.getMessage(),
+                        "Duplicate Resource",
+                        LocalDateTime.now(),
+                        null));
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationError(MethodArgumentNotValidException exception) {
-        String message = exception.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.joining(", "));
-
-        return ResponseEntity.badRequest()
-                .body(new ErrorResponse(message));
-    }
-
-    @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFoundError(NoHandlerFoundException exception){
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("You need to fill data."));
-    }
-
-    @ExceptionHandler(TypeMismatchException.class)
-    public ResponseEntity<ErrorResponse> handleTypeMismatch(TypeMismatchException exception){
-
-        return ResponseEntity.badRequest()
-                .body(new ErrorResponse(
-                        "Wrong type of data in " + "'" + exception.getPropertyName() + "'"));
+    @ExceptionHandler(ExceedingBudgetException.class)
+    public ResponseEntity<ErrorResponse> handleExceeding(ExceedingBudgetException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(400,
+                        exception.getMessage(),
+                        "Budget Exceeded",
+                        LocalDateTime.now(),
+                        null));
     }
 
     @ExceptionHandler(WrongDataException.class)
-        public ResponseEntity<ErrorResponse> handleWrongDataError(WrongDataException exception){
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(exception.getMessage()));
+    public ResponseEntity<ErrorResponse> handleWrongData(WrongDataException exception) {
+        return ResponseEntity.badRequest()
+                .body(new ErrorResponse(400,
+                        exception.getMessage(),
+                        "Invalid Data",
+                        LocalDateTime.now(),
+                        null));
     }
 
+    @ExceptionHandler(TypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(TypeMismatchException exception) {
+        return ResponseEntity.badRequest()
+                .body(new ErrorResponse(400,
+                        "Wrong type for field '" + exception.getPropertyName() + "'",
+                        "Type Mismatch",
+                        LocalDateTime.now(),
+                        null));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception exception) {
+        return ResponseEntity.status(500)
+                .body(new ErrorResponse(500,
+                        "Internal server error",
+                        "Server Error",
+                        LocalDateTime.now(),
+                        null));
+    }
 }

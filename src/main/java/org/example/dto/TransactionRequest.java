@@ -7,12 +7,12 @@ import lombok.Data;
 @Data
 public class TransactionRequest {
 
-    @NotNull
+    @NotNull(message = "Amount is required")
     private Long amount;
 
     @NotNull
     private Long budgetId;
 
-    @NotBlank
+    @NotBlank(message = "Category is required")
     private String category;
 }

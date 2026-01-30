@@ -1,6 +1,5 @@
 package org.example.service;
 
-
 import org.example.dto.*;
 
 import java.util.List;
@@ -11,13 +10,13 @@ public interface UserService {
 
     LoginResponse login(LoginRequest request);
 
-    void deleteUser(Long userId);
+    void deleteUser(String email);
 
-    void changeName(Long userId, String newName);
+    void changeName(String newName, String email);
 
-    void changeEmail(Long userId, String newEmail);
+//    void changeEmail(String email, String newEmail);
 
-    void changePassword(Long userId, String newPassword);
+    void changePassword(String newPassword, String email);
 
     List<UserDto> getAllUsers();
 
