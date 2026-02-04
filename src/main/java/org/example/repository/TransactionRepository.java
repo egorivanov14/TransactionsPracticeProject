@@ -1,6 +1,7 @@
 package org.example.repository;
 
 import org.example.entity.Transaction;
+import org.example.entity.Type;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -36,8 +37,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findAllByUser(@Param("email") String email);
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.budget.id = :budgetId " +
-            "AND t.user.email = :email")
-    Long sumAmountByBudgetId(@Param("budgetId") Long budgetId, @Param("email") String email);
+            "AND t.type = :type AND t.user.email = :email")
+    Long sumByType(@Param("budgetId") Long budgetId, @Param("type")Type type, @Param("email") String email);
 
     @Query("SELECT t FROM Transaction t WHERE t.budget.id = :budgetId " +
             "AND t.category = :category " +

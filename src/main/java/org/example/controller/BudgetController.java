@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.BudgetRequest;
 import org.example.dto.BudgetResponse;
+import org.example.dto.BudgetStatus;
 import org.example.service.BudgetService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,19 +33,19 @@ public class BudgetController {
     }
 
     @PutMapping("/budgetId/{budgetId}/limit/")
-    public ResponseEntity<Void> changeLimitAmount(@PathVariable Long budgetId,
-                                                  @PathVariable Long newLimitAmount,
-                                                  @AuthenticationPrincipal UserDetails userDetails){
+    public ResponseEntity<Void> changeInitialAmount(@PathVariable Long budgetId,
+                                                    @RequestParam Long newInitialAmount,
+                                                    @AuthenticationPrincipal UserDetails userDetails){
         String email = userDetails.getUsername();
 
-        budgetService.changeLimitAmount(budgetId, newLimitAmount, email);
+        budgetService.changeInitialAmount(budgetId, newInitialAmount, email);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
     @PutMapping("/budgetId/{budgetId}/account/")
     public ResponseEntity<Void> changeAccount(@PathVariable Long budgetId,
-                                              @PathVariable String newAccount,
+                                              @RequestParam String newAccount,
                                               @AuthenticationPrincipal UserDetails userDetails
                                               ){
         String email = userDetails.getUsername();
@@ -73,24 +74,24 @@ public class BudgetController {
         return ResponseEntity.ok(budgetResponses);
     }
 
-    @GetMapping("id/{budgetId}")
+    @GetMapping("/id/{budgetId}")
     public ResponseEntity<BudgetResponse> getBudgetById(@PathVariable Long budgetId,
                                                         @AuthenticationPrincipal UserDetails userDetails){
         String email = userDetails.getUsername();
-        return ResponseEntity.ok(budgetService.getBudgetByIdAndUser(budgetId, email));
+        return ResponseEntity.ok(budgetService.getBudgetById(budgetId, email));
     }
 
-    @GetMapping("/amount/id/{id}")
-    public ResponseEntity<Long> getSpendAmountByBudgetId(@PathVariable Long id,
+    @GetMapping("/expenditure/id/{id}")
+    public ResponseEntity<Long> getExpenditure(@PathVariable Long id,
                                                          @AuthenticationPrincipal UserDetails userDetails){
         String email = userDetails.getUsername();
-        return  ResponseEntity.ok(budgetService.getSpendAmountByBudgetIdAndUser(id, email));
+        return  ResponseEntity.ok(budgetService.getExpenditure(id, email));
     }
 
-    @GetMapping("/remains/{budgetId}")
-    public ResponseEntity<Long> getBudgetRemains(@PathVariable Long budgetId,
-                                                 @AuthenticationPrincipal UserDetails userDetails){
+    @GetMapping("/status/{budgetId}")
+    public ResponseEntity<BudgetStatus> getBudgetRemains(@PathVariable Long budgetId,
+                                                         @AuthenticationPrincipal UserDetails userDetails){
         String email = userDetails.getUsername();
-        return ResponseEntity.ok(budgetService.getBudgetRemains(budgetId, email));
+        return ResponseEntity.ok(budgetService.getBudgetStatus(budgetId, email));
     }
 }

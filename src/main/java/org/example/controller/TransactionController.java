@@ -50,7 +50,7 @@ public class TransactionController {
     }
 
     @GetMapping("/account/")
-    public ResponseEntity<List<TransactionResponse>> getAllByAccountAndUser(@PathVariable String account
+    public ResponseEntity<List<TransactionResponse>> getAllByAccountAndUser(@RequestParam String account
             , @AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
 
@@ -63,12 +63,12 @@ public class TransactionController {
                                                        @AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
 
-        TransactionResponse transaction = transactionService.getByIdAndUser(id, email);
+        TransactionResponse transaction = transactionService.getById(id, email);
         return ResponseEntity.ok(transaction);
     }
 
     @GetMapping("/amount/")
-    public ResponseEntity<List<TransactionResponse>> getAllByAmountAndUser(@PathVariable Long amount
+    public ResponseEntity<List<TransactionResponse>> getAllByAmountAndUser(@RequestParam Long amount
             , @AuthenticationPrincipal UserDetails userDetails ){
         String email = userDetails.getUsername();
 
@@ -78,7 +78,7 @@ public class TransactionController {
     }
 
     @GetMapping("/createdAt/")
-    public ResponseEntity<List<TransactionResponse>> getAllByCreatedAtAndUser(@PathVariable LocalDate createdAt
+    public ResponseEntity<List<TransactionResponse>> getAllByCreatedAtAndUser(@RequestParam LocalDate createdAt
             , @AuthenticationPrincipal UserDetails userDetails){
         String email = userDetails.getUsername();
 
@@ -88,7 +88,7 @@ public class TransactionController {
     }
 
     @GetMapping("/category/")
-    public ResponseEntity<List<TransactionResponse>> getAllByCategoryAndUser(@PathVariable String category
+    public ResponseEntity<List<TransactionResponse>> getAllByCategoryAndUser(@RequestParam String category
             , @AuthenticationPrincipal UserDetails userDetails){
         String email = userDetails.getUsername();
 
@@ -108,10 +108,10 @@ public class TransactionController {
     @GetMapping("/budgetId/{budgetId}/category/")
     public ResponseEntity<List<TransactionResponse>> getAllByBudgetIdAndCategoryAndUser(
             @PathVariable Long budgetId,
-            @PathVariable String category,
+            @RequestParam String category,
             @AuthenticationPrincipal UserDetails userDetails){
         String email = userDetails.getUsername();
 
-        return ResponseEntity.ok(transactionService.getAllByBudgetIdAndCategoryAndUser(budgetId, category, email));
+        return ResponseEntity.ok(transactionService.getAllByBudgetIdAndCategory(budgetId, category, email));
     }
 }

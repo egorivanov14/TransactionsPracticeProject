@@ -22,7 +22,7 @@ public class Budget {
     private String account;
 
     @Column(nullable = false)
-    private Long limitAmount;
+    private Long initialAmount;
 
     @Column(nullable = false)
     private LocalDate startDate;

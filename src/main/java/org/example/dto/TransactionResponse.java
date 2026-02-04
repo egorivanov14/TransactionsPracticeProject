@@ -1,6 +1,7 @@
 package org.example.dto;
 
 import lombok.Data;
+import org.example.entity.Type;
 
 import java.time.LocalDate;
 
@@ -12,6 +13,8 @@ public class TransactionResponse {
     private String account;
 
     private String category;
+
+    private Type type;
 
     private Long amount;
 

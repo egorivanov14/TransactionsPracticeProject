@@ -20,9 +20,9 @@ public interface TransactionService {
 
     List<TransactionResponse> getAllByBudgetIdAndUser(Long budgetId, String email);
 
-    List<TransactionResponse> getAllByBudgetIdAndCategoryAndUser(Long budgetId, String category, String email);
+    List<TransactionResponse> getAllByBudgetIdAndCategory(Long budgetId, String category, String email);
 
-    TransactionResponse getByIdAndUser(Long id, String email);
+    TransactionResponse getById(Long id, String email);
 
     List<TransactionResponse> getAllByAmountAndUser(Long amount, String email);
 

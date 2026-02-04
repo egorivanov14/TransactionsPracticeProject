@@ -10,10 +10,11 @@ import lombok.Data;
 public class BudgetRequest {
 
     @NotBlank(message = "Account is required")
+
     private String account;
 
     @NotNull
-    @Min(0L) @Max(9223372036854775807L)
-    private Long limitAmount;
+    @Min(1L) @Max(Long.MAX_VALUE)
+    private Long initialAmount;
 
 }

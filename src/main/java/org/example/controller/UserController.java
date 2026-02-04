@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -45,5 +46,13 @@ public class UserController {
 
         return ResponseEntity.ok(users);
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<Map<String, String>> getMySelf(@AuthenticationPrincipal UserDetails userDetails){
+        String email = userDetails.getUsername();
+
+        return ResponseEntity.ok(Map.of("email", email));
+    }
+
 
 }

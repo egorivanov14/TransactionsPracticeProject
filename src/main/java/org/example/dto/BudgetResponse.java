@@ -12,7 +12,7 @@ public class BudgetResponse {
 
     private String account;
 
-    private Long limitAmount;
+    private Long initialAmount;
 
     private LocalDate startDate;
 

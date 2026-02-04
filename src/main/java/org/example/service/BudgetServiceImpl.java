@@ -3,8 +3,9 @@ package org.example.service;
 import lombok.RequiredArgsConstructor;
 import org.example.dto.BudgetRequest;
 import org.example.dto.BudgetResponse;
+import org.example.dto.BudgetStatus;
 import org.example.entity.Budget;
-import org.example.entity.Role;
+import org.example.entity.Type;
 import org.example.entity.User;
 import org.example.exception.AccessDeniedException;
 import org.example.exception.ResourceNotFoundException;
@@ -68,7 +69,7 @@ public class BudgetServiceImpl implements BudgetService {
 
     @Transactional
     @Override
-    public BudgetResponse getBudgetByIdAndUser(Long budgetId, String email) {
+    public BudgetResponse getBudgetById(Long budgetId, String email) {
 
         Budget budget = budgetRepository.findByBudgetIdAndUser(budgetId, email)
                 .orElseThrow(() -> new ResourceNotFoundException("No budget with this id or it is not your budget."));
@@ -78,13 +79,13 @@ public class BudgetServiceImpl implements BudgetService {
 
     @Transactional
     @Override
-    public Long getSpendAmountByBudgetIdAndUser(Long id, String email) {
+    public Long getExpenditure(Long id, String email) {
 
         Budget budget = budgetRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
 
         if (budget.getUser().getEmail().equals(email)) {
-            return transactionRepository.sumAmountByBudgetId(id, email);
+            return transactionRepository.sumByType(id, Type.EXPENDITURE, email);
         } else {
             throw new AccessDeniedException("Not your budget.");
         }
@@ -92,13 +93,13 @@ public class BudgetServiceImpl implements BudgetService {
 
     @Transactional
     @Override
-    public void changeLimitAmount(Long budgetId, Long newLimitAmount, String email) {
+    public void changeInitialAmount(Long budgetId, Long newInitialAmount, String email) {
 
         Budget budget = budgetRepository.findById(budgetId)
                 .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
 
         if(budget.getUser().getEmail().equals(email)){
-            budget.setLimitAmount(newLimitAmount);
+            budget.setInitialAmount(newInitialAmount);
             budgetRepository.save(budget);
         }
         else {
@@ -125,12 +126,23 @@ public class BudgetServiceImpl implements BudgetService {
 
     @Transactional
     @Override
-    public Long getBudgetRemains(Long budgetId, String email) {
+    public BudgetStatus getBudgetStatus(Long budgetId, String email) {
         Budget budget = budgetRepository.findById(budgetId)
                 .orElseThrow(() -> new ResourceNotFoundException("No budget with this id."));
 
         if(budget.getUser().getEmail().equals(email)){
-            return budget.getLimitAmount() - transactionRepository.sumAmountByBudgetId(budgetId, email);
+
+            Long income = transactionRepository.sumByType(budgetId, Type.INCOME, email);
+
+            Long expenditure = transactionRepository.sumByType(budgetId, Type.EXPENDITURE, email);
+
+            Long remains = budget.getInitialAmount() + income - expenditure;
+
+            return new BudgetStatus(
+                    income,
+                    expenditure,
+                    remains
+            );
         }
         else {
             throw new AccessDeniedException("Not your budget.");

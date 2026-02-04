@@ -1,7 +1,6 @@
 package org.example.service;
 
 import org.example.dto.*;
-
 import java.util.List;
 
 public interface UserService {
@@ -25,4 +24,5 @@ public interface UserService {
     UserDto getUserByEmail(String email);
 
     UserDto getUserByName(String name);
+
 }

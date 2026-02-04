@@ -14,14 +14,5 @@ public interface UserMapper {
     @Mapping(target = "password", ignore = true)
     User toEntity(RegisterRequest request);
 
-//    @Mapping(target = "id", ignore = true)
-//    @Mapping(target = "budgets", ignore = true)
-//    @Mapping(target = "transactions", ignore = true)
-//    @Mapping(target = "email", ignore = true)
-//    User toEntity(LoginRequest request);
-
-    @Mapping(target = "token", ignore = true)
-    RegisterResponse toResponse(User user);
-
     UserDto toDto(User user);
 }

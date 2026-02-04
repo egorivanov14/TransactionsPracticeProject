@@ -5,6 +5,7 @@ import org.example.dto.TransactionRequest;
 import org.example.dto.TransactionResponse;
 import org.example.entity.Budget;
 import org.example.entity.Transaction;
+import org.example.entity.Type;
 import org.example.exception.AccessDeniedException;
 import org.example.exception.ExceedingBudgetException;
 import org.example.exception.ResourceNotFoundException;
@@ -17,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,10 +39,16 @@ public class TransactionServiceImpl implements TransactionService{
         if(budget.getUser().getEmail().equals(email)){
             Transaction transaction = transactionMapper.toEntity(request);
 
-            if(transactionRepository.sumAmountByBudgetId(budget.getId(), email) + transaction.getAmount()
-                    > budget.getLimitAmount()){
+            if(transaction.getType().equals(Type.EXPENDITURE)){
 
-                throw new ExceedingBudgetException("The cost is more then the limit.");
+                if(budget.getInitialAmount()
+                        + transactionRepository.sumByType(budget.getId(), Type.INCOME, email)
+                        - transactionRepository.sumByType(budget.getId(), Type.EXPENDITURE, email)
+                        - transaction.getAmount()
+                        < 0){
+
+                    throw new ExceedingBudgetException("Not enough funds");
+                }
             }
 
             transaction.setBudget(budget);
@@ -60,20 +66,13 @@ public class TransactionServiceImpl implements TransactionService{
     @Override
     public void deleteTransaction(Long id, String email) {
 
-        Optional<Transaction> transactionOptional = transactionRepository.findById(id);
+        Transaction transaction = transactionRepository.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException("No transaction with this id."));
 
-        if(transactionOptional.isPresent()){
-            Transaction transaction = transactionOptional.get();
-
-            if(transaction.getUser().getEmail().equals(email)){
-                transactionRepository.deleteById(id);
-            }
-            else {
-                throw new AccessDeniedException("This transaction not for this user.");
-            }
-        }
-        else {
-            throw new ResourceNotFoundException("No transaction with this id.");
+        if (transaction.getUser().getEmail().equals(email)) {
+            transactionRepository.deleteById(id);
+        } else {
+            throw new AccessDeniedException("This transaction not for this user.");
         }
 
     }
@@ -116,7 +115,7 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional(readOnly = true)
     @Override
-    public List<TransactionResponse> getAllByBudgetIdAndCategoryAndUser(
+    public List<TransactionResponse> getAllByBudgetIdAndCategory(
             Long budgetId, String category, String email) {
 
         List<Transaction> transactions = transactionRepository
@@ -127,7 +126,7 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional(readOnly = true)
     @Override
-    public TransactionResponse getByIdAndUser(Long id, String email) {
+    public TransactionResponse getById(Long id, String email) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Transaction not found. No transaction with this ID."));

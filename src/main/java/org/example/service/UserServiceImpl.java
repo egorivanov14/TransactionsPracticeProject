@@ -42,10 +42,7 @@ public class UserServiceImpl implements UserService{
 
         String token = jwtService.generateToken(user);
 
-        RegisterResponse response = userMapper.toResponse(user);
-        response.setToken(token);
-
-        return response;
+        return new RegisterResponse(token);
     }
 
     @Transactional
@@ -59,7 +56,7 @@ public class UserServiceImpl implements UserService{
 
             String token = jwtService.generateToken(user);
 
-            return new LoginResponse(token, user.getId(), user.getEmail());
+            return new LoginResponse(token);
         }
         else{
             throw new RuntimeException("Invalid password.");
