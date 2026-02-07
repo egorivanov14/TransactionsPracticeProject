@@ -1,5 +1,6 @@
 package org.example.mapper;
 
+import org.example.dto.SchedulePoint;
 import org.example.dto.TransactionRequest;
 import org.example.dto.TransactionResponse;
 import org.example.entity.Transaction;
@@ -15,5 +16,6 @@ public interface TransactionMapper {
 
     @Mapping(source = "budget.account", target = "account")
     TransactionResponse toResponse(Transaction transaction);
+
 
 }

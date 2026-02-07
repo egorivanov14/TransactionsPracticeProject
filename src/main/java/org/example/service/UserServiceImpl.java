@@ -3,7 +3,7 @@ package org.example.service;
 import lombok.RequiredArgsConstructor;
 import org.example.config.JwtService;
 import org.example.dto.*;
-import org.example.entity.Role;
+import org.example.dto.Role;
 import org.example.entity.User;
 import org.example.exception.DuplicateResourceException;
 import org.example.exception.ResourceNotFoundException;

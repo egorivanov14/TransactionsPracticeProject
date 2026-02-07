@@ -1,10 +1,10 @@
 package org.example.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.dto.Type;
 
 import java.time.LocalDate;
 

@@ -10,7 +10,6 @@ import lombok.Data;
 public class BudgetRequest {
 
     @NotBlank(message = "Account is required")
-
     private String account;
 
     @NotNull

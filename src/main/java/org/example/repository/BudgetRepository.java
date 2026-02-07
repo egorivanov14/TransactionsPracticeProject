@@ -12,7 +12,6 @@ import java.util.Optional;
 @Repository
 public interface BudgetRepository extends JpaRepository<Budget, Long> {
 
-
     @Query("SELECT b FROM Budget b JOIN FETCH b.user WHERE b.user.email = :email")
     List<Budget> findAllByUser(@Param("email") String email);
 

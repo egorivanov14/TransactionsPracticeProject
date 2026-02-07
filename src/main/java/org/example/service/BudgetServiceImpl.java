@@ -5,7 +5,7 @@ import org.example.dto.BudgetRequest;
 import org.example.dto.BudgetResponse;
 import org.example.dto.BudgetStatus;
 import org.example.entity.Budget;
-import org.example.entity.Type;
+import org.example.dto.Type;
 import org.example.entity.User;
 import org.example.exception.AccessDeniedException;
 import org.example.exception.ResourceNotFoundException;

@@ -5,7 +5,7 @@ import org.example.dto.TransactionRequest;
 import org.example.dto.TransactionResponse;
 import org.example.entity.Budget;
 import org.example.entity.Transaction;
-import org.example.entity.Type;
+import org.example.dto.Type;
 import org.example.exception.AccessDeniedException;
 import org.example.exception.ExceedingBudgetException;
 import org.example.exception.ResourceNotFoundException;

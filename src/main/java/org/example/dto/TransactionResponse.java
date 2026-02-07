@@ -1,7 +1,6 @@
 package org.example.dto;
 
 import lombok.Data;
-import org.example.entity.Type;
 
 import java.time.LocalDate;
 
