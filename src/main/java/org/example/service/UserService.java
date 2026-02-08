@@ -1,7 +1,8 @@
 package org.example.service;
 
 import org.example.dto.*;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface UserService {
 
@@ -17,7 +18,7 @@ public interface UserService {
 
     void changePassword(String newPassword, String email);
 
-    List<UserDto> getAllUsers();
+    Page<UserDto> getAllUsers(Pageable pageable);
 
     UserDto getUserById(Long id);
 

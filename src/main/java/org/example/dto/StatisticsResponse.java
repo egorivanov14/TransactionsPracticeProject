@@ -21,4 +21,6 @@ public class StatisticsResponse {
     private Long balanceStartAmount;
     private Long transactionsQuantity;
 
+    private List<PieChartSector> pieChartSectors;
+
 }

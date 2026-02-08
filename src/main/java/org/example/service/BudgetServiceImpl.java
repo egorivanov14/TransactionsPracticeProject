@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.dto.BudgetRequest;
 import org.example.dto.BudgetResponse;
 import org.example.dto.BudgetStatus;
-import org.example.entity.Budget;
 import org.example.dto.Type;
+import org.example.entity.Budget;
 import org.example.entity.User;
 import org.example.exception.AccessDeniedException;
 import org.example.exception.ResourceNotFoundException;
@@ -13,10 +13,10 @@ import org.example.mapper.BudgetMapper;
 import org.example.repository.BudgetRepository;
 import org.example.repository.TransactionRepository;
 import org.example.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -58,13 +58,13 @@ public class BudgetServiceImpl implements BudgetService {
 
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
-    public List<BudgetResponse> getAllBudgetsByUser(String email) {
+    public Page<BudgetResponse> getAllBudgetsByUser(String email, Pageable pageable) {
 
-        List<Budget> budgets = budgetRepository.findAllByUser(email);
+        Page<Budget> budgets = budgetRepository.findAllByUser(email, pageable);
 
-        return budgets.stream().map(budgetMapper::toResponse).toList();
+        return budgets.map(budgetMapper::toResponse);
     }
 
     @Transactional

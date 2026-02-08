@@ -3,17 +3,16 @@ package org.example.service;
 import lombok.RequiredArgsConstructor;
 import org.example.config.JwtService;
 import org.example.dto.*;
-import org.example.dto.Role;
 import org.example.entity.User;
 import org.example.exception.DuplicateResourceException;
 import org.example.exception.ResourceNotFoundException;
 import org.example.mapper.UserMapper;
 import org.example.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 
 @Service
@@ -123,11 +122,11 @@ public class UserServiceImpl implements UserService{
 
 
     @Override
-    public List<UserDto> getAllUsers() {
+    public Page<UserDto> getAllUsers(Pageable pageable) {
 
-        List<User> users = userRepository.findAll();
+        Page<User> users = userRepository.findAll(pageable);
 
-        return users.stream().map(userMapper::toDto).toList();
+        return users.map(userMapper::toDto);
     }
 
     @Override

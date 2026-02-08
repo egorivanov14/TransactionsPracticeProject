@@ -3,8 +3,8 @@ package org.example.service;
 import org.example.dto.BudgetRequest;
 import org.example.dto.BudgetResponse;
 import org.example.dto.BudgetStatus;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface BudgetService {
 
@@ -12,7 +12,7 @@ public interface BudgetService {
 
     void deleteBudgetById(Long id, String email);
 
-    List<BudgetResponse> getAllBudgetsByUser(String email);
+    Page<BudgetResponse> getAllBudgetsByUser(String email, Pageable pageable);
 
     BudgetResponse getBudgetById(Long budgetId, String email);
 

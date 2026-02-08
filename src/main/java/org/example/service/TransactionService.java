@@ -2,9 +2,8 @@ package org.example.service;
 
 import org.example.dto.TransactionRequest;
 import org.example.dto.TransactionResponse;
-
-import java.time.LocalDate;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface TransactionService {
 
@@ -12,20 +11,20 @@ public interface TransactionService {
 
     void deleteTransaction(Long id, String email);
 
-    List<TransactionResponse> getAllTransactionsByUser(String email);
+    Page<TransactionResponse> getAllTransactionsByUser(String email, Pageable pageable);
 
-    List<TransactionResponse> getAllByAccountAndUser(String account, String email);
+//    List<TransactionResponse> getAllByAccountAndUser(String account, String email);
 
-    List<TransactionResponse> getAllByCategoryAndUser(String category, String email);
+//    List<TransactionResponse> getAllByCategoryAndUser(String category, String email);
 
-    List<TransactionResponse> getAllByBudgetIdAndUser(Long budgetId, String email);
+    Page<TransactionResponse> getAllByBudgetIdAndUser(Long budgetId, String email, Pageable pageable);
 
-    List<TransactionResponse> getAllByBudgetIdAndCategory(Long budgetId, String category, String email);
+//    List<TransactionResponse> getAllByBudgetIdAndCategory(Long budgetId, String category, String email);
 
     TransactionResponse getById(Long id, String email);
 
-    List<TransactionResponse> getAllByAmountAndUser(Long amount, String email);
+//    List<TransactionResponse> getAllByAmountAndUser(Long amount, String email);
 
-    List<TransactionResponse> getAllByCreatedAtAndUser(LocalDate createdAt, String email);
+//    List<TransactionResponse> getAllByCreatedAtAndUser(LocalDate createdAt, String email);
 
 }

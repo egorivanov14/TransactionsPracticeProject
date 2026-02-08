@@ -1,11 +1,8 @@
 package org.example.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.dto.SchedulePoint;
-import org.example.dto.StatisticsRequest;
-import org.example.dto.StatisticsResponse;
+import org.example.dto.*;
 import org.example.entity.Budget;
-import org.example.dto.Type;
 import org.example.exception.AccessDeniedException;
 import org.example.exception.ResourceNotFoundException;
 import org.example.repository.BudgetRepository;
@@ -50,7 +47,7 @@ public class StatisticsServiceImpl implements StatisticsService{
 
         Long transactionsQuantity = transactionRepository.getTransactionsQuantity(email, startDate, budgetId);
 
-        Long daysCount = Math.max(1, startDate.until(LocalDate.now(), ChronoUnit.DAYS));
+        Long daysCount = startDate.until(LocalDate.now(), ChronoUnit.DAYS) + 1;
 
         Long averageDailyIncome = totalIncome/daysCount;
         Long averageDailyExpenditure = totalExpenditure/daysCount;
@@ -62,6 +59,7 @@ public class StatisticsServiceImpl implements StatisticsService{
                 budget.getStartDate(), startDate.minusDays(1), email);
 
         List<SchedulePoint> points = getPoints(budgetStartAmount, budgetId, startDate, daysCount, email);
+        List<PieChartSector> pieChartSectors = getPieChartSectors(budgetId, transactionsQuantity, email, startDate, totalExpenditure);
 
         return new StatisticsResponse(points,
                 totalIncome,
@@ -70,7 +68,8 @@ public class StatisticsServiceImpl implements StatisticsService{
                 averageDailyExpenditure,
                 netBalance,
                 budgetStartAmount,
-                transactionsQuantity);
+                transactionsQuantity,
+                pieChartSectors);
     }
 
     private List<SchedulePoint> getPoints(Long balance,  Long budgetId,
@@ -94,5 +93,33 @@ public class StatisticsServiceImpl implements StatisticsService{
         }
 
         return points;
+    }
+
+    private List<PieChartSector> getPieChartSectors(Long budgetId, Long transactionsQuantity,
+                                                    String email, LocalDate startDate,
+                                                    Long totalExpenditure){
+
+        List<PieChartSector> pieChartSectors = new ArrayList<>();
+        List<String> categories = transactionRepository.getCategoriesByBudgetAndPeriod
+                (email, startDate, budgetId, Type.EXPENDITURE);
+        Long sumByCategory;
+        double percentage;
+
+        for(String category : categories){
+            sumByCategory = transactionRepository.sumByPeriodAndCategory(budgetId,
+                    Type.EXPENDITURE,
+                    startDate,
+                    LocalDate.now(),
+                    email,
+                    category);
+
+            percentage = totalExpenditure > 0 ? (double)sumByCategory / totalExpenditure * 100 : 0.0;
+
+            pieChartSectors.add(new PieChartSector(category, sumByCategory, percentage));
+
+        }
+
+        return pieChartSectors;
+
     }
 }

@@ -13,11 +13,10 @@ import org.example.mapper.TransactionMapper;
 import org.example.repository.BudgetRepository;
 import org.example.repository.TransactionRepository;
 import org.example.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -79,50 +78,50 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Transactional(readOnly = true)
     @Override
-    public List<TransactionResponse> getAllTransactionsByUser(String email) {
-        List<Transaction> transactions = transactionRepository.findAllByUser(email);
+    public Page<TransactionResponse> getAllTransactionsByUser(String email, Pageable pageable) {
+        Page<Transaction> transactions = transactionRepository.findAllByUser(email, pageable);
 
-        return transactions.stream().map(transactionMapper::toResponse).toList();
+        return transactions.map(transactionMapper::toResponse);
     }
+
+//    @Transactional(readOnly = true)
+//    @Override
+//    public List<TransactionResponse> getAllByAccountAndUser(String account, String email) {
+//
+//        List<Transaction> transactions = transactionRepository.findAllByAccountAndUser(account, email);
+//
+//        return transactions.stream().map(transactionMapper::toResponse).toList();
+//
+//    }
+//
+//    @Transactional(readOnly = true)
+//    @Override
+//    public List<TransactionResponse> getAllByCategoryAndUser(String category, String email) {
+//
+//        List<Transaction> transactions = transactionRepository.findAllByCategoryAndUser(category, email);
+//
+//        return transactions.stream().map(transactionMapper::toResponse).toList();
+//    }
 
     @Transactional(readOnly = true)
     @Override
-    public List<TransactionResponse> getAllByAccountAndUser(String account, String email) {
+    public Page<TransactionResponse> getAllByBudgetIdAndUser(Long budgetId, String email, Pageable pageable) {
 
-        List<Transaction> transactions = transactionRepository.findAllByAccountAndUser(account, email);
+        Page<Transaction> transactions = transactionRepository.findAllByBudgetIdAndUser(budgetId, email, pageable);
 
-        return transactions.stream().map(transactionMapper::toResponse).toList();
-
+        return transactions.map(transactionMapper::toResponse);
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<TransactionResponse> getAllByCategoryAndUser(String category, String email) {
-
-        List<Transaction> transactions = transactionRepository.findAllByCategoryAndUser(category, email);
-
-        return transactions.stream().map(transactionMapper::toResponse).toList();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<TransactionResponse> getAllByBudgetIdAndUser(Long budgetId, String email) {
-
-        List<Transaction> transactions = transactionRepository.findAllByBudgetIdAndUser(budgetId, email);
-
-        return transactions.stream().map(transactionMapper::toResponse).toList();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<TransactionResponse> getAllByBudgetIdAndCategory(
-            Long budgetId, String category, String email) {
-
-        List<Transaction> transactions = transactionRepository
-                .findAllByBudgetIdAndCategoryAndUser(budgetId, category, email);
-
-        return transactions.stream().map(transactionMapper::toResponse).toList();
-    }
+//    @Transactional(readOnly = true)
+//    @Override
+//    public List<TransactionResponse> getAllByBudgetIdAndCategory(
+//            Long budgetId, String category, String email) {
+//
+//        List<Transaction> transactions = transactionRepository
+//                .findAllByBudgetIdAndCategoryAndUser(budgetId, category, email);
+//
+//        return transactions.stream().map(transactionMapper::toResponse).toList();
+//    }
 
     @Transactional(readOnly = true)
     @Override
@@ -140,22 +139,22 @@ public class TransactionServiceImpl implements TransactionService{
 
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<TransactionResponse> getAllByAmountAndUser(Long amount, String email) {
-
-        List<Transaction> transactions = transactionRepository.findAllByAmountAndUser(amount, email);
-
-        return transactions.stream().map(transactionMapper::toResponse).toList();
-
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<TransactionResponse> getAllByCreatedAtAndUser(LocalDate createdAt, String email) {
-
-        List<Transaction> transactions = transactionRepository.findAllByCreatedAtAndUser(createdAt, email);
-
-        return transactions.stream().map(transactionMapper::toResponse).toList();
-    }
+//    @Transactional(readOnly = true)
+//    @Override
+//    public List<TransactionResponse> getAllByAmountAndUser(Long amount, String email) {
+//
+//        List<Transaction> transactions = transactionRepository.findAllByAmountAndUser(amount, email);
+//
+//        return transactions.stream().map(transactionMapper::toResponse).toList();
+//
+//    }
+//
+//    @Transactional(readOnly = true)
+//    @Override
+//    public List<TransactionResponse> getAllByCreatedAtAndUser(LocalDate createdAt, String email) {
+//
+//        List<Transaction> transactions = transactionRepository.findAllByCreatedAtAndUser(createdAt, email);
+//
+//        return transactions.stream().map(transactionMapper::toResponse).toList();
+//    }
 }
