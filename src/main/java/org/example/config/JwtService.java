@@ -10,13 +10,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Date;
 
 @Service
 public class JwtService {
 
     private static final String SECRET_KEY = "43ffe90d15f0d47a9aa67b7ed522db7d2c539a4c2f284a4884a0c01b42d33e3f";
-    private final long EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7;
+    private final long EXPIRATION_TIME = 1000 * 60 * 15;
 
     private SecretKey getSignInKey() {
 
@@ -35,6 +39,14 @@ public class JwtService {
                 .signWith(getSignInKey())
                 .compact();
     }
+
+    public String generateRefreshToken() {
+
+        byte[] randomBytes = new byte[64];
+        new java.security.SecureRandom().nextBytes(randomBytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+    }
+
 
     public boolean isTokenValid(String token, UserDetails userDetails){
         try {
@@ -62,7 +74,6 @@ public class JwtService {
         }
     }
 
-
     public String getEmailFromToken(String token){
         Claims claims = Jwts.parser()
                 .verifyWith(getSignInKey())
@@ -71,7 +82,6 @@ public class JwtService {
                 .getPayload();
 
         return claims.getSubject();
-
     }
 
     public Long getUserIdFromToken(String token){
@@ -82,6 +92,16 @@ public class JwtService {
                 .getPayload();
 
         return claims.get("userId", Long.class);
+    }
+
+    public String hashToken(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

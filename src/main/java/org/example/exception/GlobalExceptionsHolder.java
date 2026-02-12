@@ -97,4 +97,16 @@ public class GlobalExceptionsHolder {
                         LocalDateTime.now(),
                         null));
     }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRefreshTokenExceptions(InvalidRefreshTokenException exception){
+        return ResponseEntity.status(401)
+                .body(new ErrorResponse(
+                        401,
+                        exception.getMessage(),
+                        "Unauthorized",
+                        LocalDateTime.now(),
+                        null
+                ));
+    }
 }

@@ -1,18 +1,25 @@
 package org.example.service;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.config.JwtService;
 import org.example.dto.*;
+import org.example.entity.RefreshToken;
 import org.example.entity.User;
 import org.example.exception.DuplicateResourceException;
+import org.example.exception.InvalidRefreshTokenException;
 import org.example.exception.ResourceNotFoundException;
 import org.example.mapper.UserMapper;
+import org.example.repository.RefreshTokenRepository;
 import org.example.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 
 @Service
@@ -23,39 +30,64 @@ public class UserServiceImpl implements UserService{
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
     @Override
-    public RegisterResponse register(RegisterRequest request) {
+    public TokenResponse register(RegisterRequest request, HttpServletResponse response) {
 
         if(userRepository.existsByEmail(request.getEmail())){
             throw new DuplicateResourceException("User with this email already exists.");
         }
 
         User user = userMapper.toEntity(request);
-
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.USER);
-
         userRepository.save(user);
 
-        String token = jwtService.generateToken(user);
+        String accessToken = jwtService.generateToken(user);
+        String refreshTokenValue = jwtService.generateRefreshToken();
 
-        return new RegisterResponse(token);
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setUserId(user.getId());
+        refreshToken.setTokenHash(jwtService.hashToken(refreshTokenValue));
+        refreshTokenRepository.save(refreshToken);
+
+        Cookie refreshCookie = new Cookie("refresh_token", refreshTokenValue);
+        refreshCookie.setHttpOnly(true);
+//        refreshCookie.setSecure(true);
+        refreshCookie.setPath("/api/users");
+        refreshCookie.setMaxAge(60*60*24*7);
+        response.addCookie(refreshCookie);
+
+        return new TokenResponse(accessToken);
     }
 
     @Transactional
     @Override
-    public LoginResponse login(LoginRequest request) {
+    public TokenResponse login(LoginRequest request, HttpServletResponse response) {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(()->new ResourceNotFoundException("User not found."));
 
         if(passwordEncoder.matches(request.getPassword(), user.getPassword())){
 
-            String token = jwtService.generateToken(user);
+            String accessToken = jwtService.generateToken(user);
+            String refreshTokenValue = jwtService.generateRefreshToken();
 
-            return new LoginResponse(token);
+            RefreshToken refreshToken = new RefreshToken();
+            refreshToken.setUserId(user.getId());
+            refreshToken.setTokenHash(jwtService.hashToken(refreshTokenValue));
+            refreshTokenRepository.save(refreshToken);
+
+            Cookie refreshCookie = new Cookie("refresh_token", refreshTokenValue);
+            refreshCookie.setHttpOnly(true);
+//            refreshCookie.setSecure(true);
+            refreshCookie.setPath("/api/users");
+            refreshCookie.setMaxAge(60*60*24*7);
+            response.addCookie(refreshCookie);
+
+            return new TokenResponse(accessToken);
         }
         else{
             throw new RuntimeException("Invalid password.");
@@ -154,6 +186,67 @@ public class UserServiceImpl implements UserService{
                 .orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
         return userMapper.toDto(user);
+    }
+
+    @Override
+    public TokenResponse refresh(String refreshToken, HttpServletResponse response) {
+
+        if(refreshToken == null){
+            throw new InvalidRefreshTokenException("No refresh token.");
+        }
+
+        String refTokenHash = jwtService.hashToken(refreshToken);
+        RefreshToken oldRefreshToken = refreshTokenRepository.findValidByHash(refTokenHash).orElseThrow(
+                ()->new InvalidRefreshTokenException("Invalid token."));
+
+        if(LocalDateTime.now().isAfter(oldRefreshToken.getExpirationDate())){
+            throw new InvalidRefreshTokenException("Invalid token.");
+        }
+
+        User user = userRepository.findById(oldRefreshToken.getUserId()).orElseThrow(
+                ()-> new ResourceNotFoundException("User not found."));
+
+        String accessToken = jwtService.generateToken(user);
+        String refreshTokenValue = jwtService.generateRefreshToken();
+
+        RefreshToken refreshTokenEntity = new RefreshToken();
+        refreshTokenEntity.setTokenHash(jwtService.hashToken(refreshTokenValue));
+        refreshTokenEntity.setUserId(oldRefreshToken.getUserId());
+
+        oldRefreshToken.setRevoked(true);
+        oldRefreshToken.setRevokedAt(LocalDateTime.now());
+        refreshTokenRepository.save(oldRefreshToken);
+        refreshTokenRepository.save(refreshTokenEntity);
+
+        Cookie refreshCookie = new Cookie("refresh_token", refreshTokenValue);
+        refreshCookie.setHttpOnly(true);
+//        refreshCookie.setSecure(true);
+        refreshCookie.setPath("/api/users");
+        refreshCookie.setMaxAge(60 * 60 * 24 * 7);
+        response.addCookie(refreshCookie);
+
+        return new TokenResponse(accessToken);
+    }
+
+    @Override
+    public void logout(String refreshToken, HttpServletResponse response) {
+
+        if(refreshToken == null){
+            throw new InvalidRefreshTokenException("No token.");
+        }
+
+        refreshTokenRepository.findValidByHash(jwtService.hashToken(refreshToken))
+                        .ifPresent(token -> {
+                            token.setRevoked(true);
+                            token.setRevokedAt(LocalDateTime.now());
+                            refreshTokenRepository.save(token);
+                        });
+
+        Cookie refreshCookie = new Cookie("refresh_token", null);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/api/users");
+        refreshCookie.setMaxAge(0);
+        response.addCookie(refreshCookie);
     }
 
 }
