@@ -1,10 +1,9 @@
-package org.example.service;
+package org.example.service.implementation;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.config.JwtService;
-import org.example.dto.*;
+import org.example.dto.user.*;
 import org.example.entity.RefreshToken;
 import org.example.entity.User;
 import org.example.exception.DuplicateResourceException;
@@ -13,24 +12,31 @@ import org.example.exception.ResourceNotFoundException;
 import org.example.mapper.UserMapper;
 import org.example.repository.RefreshTokenRepository;
 import org.example.repository.UserRepository;
+import org.example.service.MailService;
+import org.example.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final MailService mailService;
 
     @Transactional
     @Override
@@ -53,12 +59,16 @@ public class UserServiceImpl implements UserService{
         refreshToken.setTokenHash(jwtService.hashToken(refreshTokenValue));
         refreshTokenRepository.save(refreshToken);
 
-        Cookie refreshCookie = new Cookie("refresh_token", refreshTokenValue);
-        refreshCookie.setHttpOnly(true);
-//        refreshCookie.setSecure(true);
-        refreshCookie.setPath("/api/users");
-        refreshCookie.setMaxAge(60*60*24*7);
-        response.addCookie(refreshCookie);
+        ResponseCookie responseCookie = ResponseCookie.from("refresh_token", refreshTokenValue)
+                .httpOnly(true)
+//                .secure(true)
+//                .sameSite("Lax")
+                .maxAge(Duration.ofHours(24))
+                .path("/api")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
+
+        mailService.sendWelcomeMessage(user.getEmail(), user.getName());
 
         return new TokenResponse(accessToken);
     }
@@ -72,6 +82,15 @@ public class UserServiceImpl implements UserService{
 
         if(passwordEncoder.matches(request.getPassword(), user.getPassword())){
 
+             List<RefreshToken> refreshTokens = refreshTokenRepository.findValidByUserId(user.getId());
+
+             refreshTokens.forEach(refreshToken -> {
+                 refreshToken.setRevoked(true);
+                 refreshToken.setRevokedAt(LocalDateTime.now());
+             });
+
+             refreshTokenRepository.saveAll(refreshTokens);
+
             String accessToken = jwtService.generateToken(user);
             String refreshTokenValue = jwtService.generateRefreshToken();
 
@@ -80,12 +99,16 @@ public class UserServiceImpl implements UserService{
             refreshToken.setTokenHash(jwtService.hashToken(refreshTokenValue));
             refreshTokenRepository.save(refreshToken);
 
-            Cookie refreshCookie = new Cookie("refresh_token", refreshTokenValue);
-            refreshCookie.setHttpOnly(true);
-//            refreshCookie.setSecure(true);
-            refreshCookie.setPath("/api/users");
-            refreshCookie.setMaxAge(60*60*24*7);
-            response.addCookie(refreshCookie);
+            ResponseCookie responseCookie = ResponseCookie.from("refresh_token", refreshTokenValue)
+                    .httpOnly(true)
+//                    .secure(true)
+//                    .sameSite("Lax")
+                    .maxAge(Duration.ofHours(24))
+                    .path("/api")
+                    .build();
+            response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
+
+            mailService.sendWelcomeMessage(user.getEmail(), user.getName());
 
             return new TokenResponse(accessToken);
         }
@@ -102,7 +125,11 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
+        List<RefreshToken> refreshTokens = refreshTokenRepository.findAllByUser(user.getId());
+        refreshTokenRepository.deleteAll(refreshTokens);
+
         userRepository.delete(user);
+
     }
 
     @Transactional
@@ -120,26 +147,23 @@ public class UserServiceImpl implements UserService{
         userRepository.save(user);
     }
 
-//    @Transactional
-//    @Override
-//    public void changeEmail(Long userId, String newEmail) {
-//        Optional<User> userOptional = userRepository.findById(userId);
-//
-//        if(userOptional.isPresent()){
-//
-//            if(userRepository.existsByEmail(newEmail)){
-//                throw new DuplicateResourceException("User with this email already exists.");
-//            }
-//
-//            User user = userOptional.get();
-//
-//            user.setEmail(newEmail);
-//            userRepository.save(user);
-//        }
-//        else {
-//            throw new ResourceNotFoundException("No user with this id.");
-//        }
-//    }
+    @Transactional
+    @Override
+    public TokenResponse changeEmail(String email, String newEmail) {
+        if(userRepository.existsByEmail(newEmail)){
+            throw new DuplicateResourceException("User with this email already exists.");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new ResourceNotFoundException("User not found."));
+        user.setEmail(newEmail);
+        userRepository.save(user);
+
+        String newAccessToken = jwtService.generateToken(user);
+
+        return new TokenResponse(newAccessToken);
+    }
+
 
     @Transactional
     @Override
@@ -152,7 +176,7 @@ public class UserServiceImpl implements UserService{
         userRepository.save(user);
     }
 
-
+    @Transactional(readOnly = true)
     @Override
     public Page<UserDto> getAllUsers(Pageable pageable) {
 
@@ -161,33 +185,7 @@ public class UserServiceImpl implements UserService{
         return users.map(userMapper::toDto);
     }
 
-    @Override
-    public UserDto getUserById(Long id) {
-
-        return userMapper.toDto(
-                userRepository.findById(id).orElseThrow(
-                        () -> new ResourceNotFoundException("User not found.")));
-    }
-
-    @Override
-    public UserDto getUserByEmail(String email) {
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
-
-        return userMapper.toDto(user);
-
-    }
-
-    @Override
-    public UserDto getUserByName(String name) {
-
-        User user = userRepository.findByName(name)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
-
-        return userMapper.toDto(user);
-    }
-
+    @Transactional
     @Override
     public TokenResponse refresh(String refreshToken, HttpServletResponse response) {
 
@@ -196,6 +194,7 @@ public class UserServiceImpl implements UserService{
         }
 
         String refTokenHash = jwtService.hashToken(refreshToken);
+
         RefreshToken oldRefreshToken = refreshTokenRepository.findValidByHash(refTokenHash).orElseThrow(
                 ()->new InvalidRefreshTokenException("Invalid token."));
 
@@ -218,16 +217,19 @@ public class UserServiceImpl implements UserService{
         refreshTokenRepository.save(oldRefreshToken);
         refreshTokenRepository.save(refreshTokenEntity);
 
-        Cookie refreshCookie = new Cookie("refresh_token", refreshTokenValue);
-        refreshCookie.setHttpOnly(true);
-//        refreshCookie.setSecure(true);
-        refreshCookie.setPath("/api/users");
-        refreshCookie.setMaxAge(60 * 60 * 24 * 7);
-        response.addCookie(refreshCookie);
+        ResponseCookie responseCookie = ResponseCookie.from("refresh_token", refreshTokenValue)
+                .httpOnly(true)
+//                .secure(true)
+//                .sameSite("Lax")
+                .maxAge(Duration.ofHours(24))
+                .path("/api")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
 
         return new TokenResponse(accessToken);
     }
 
+    @Transactional
     @Override
     public void logout(String refreshToken, HttpServletResponse response) {
 
@@ -242,11 +244,13 @@ public class UserServiceImpl implements UserService{
                             refreshTokenRepository.save(token);
                         });
 
-        Cookie refreshCookie = new Cookie("refresh_token", null);
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setPath("/api/users");
-        refreshCookie.setMaxAge(0);
-        response.addCookie(refreshCookie);
+        ResponseCookie responseCookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+//                .secure(true)
+//                .sameSite("Lax")
+                .maxAge(Duration.ZERO)
+                .path("/api")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
     }
-
 }

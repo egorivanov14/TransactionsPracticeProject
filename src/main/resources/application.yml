@@ -7,6 +7,25 @@ spring:
     username: admin
     password: Qwnmzxop10
     driver-class-name: org.postgresql.Driver
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: budgettracker001@gmail.com
+    password: enjbdupqbupwvpyt
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    cache: false                   # в продакшн true
+
   jpa:
     hibernate:
       ddl-auto: update

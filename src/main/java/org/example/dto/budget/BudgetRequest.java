@@ -1,4 +1,4 @@
-package org.example.dto;
+package org.example.dto.budget;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

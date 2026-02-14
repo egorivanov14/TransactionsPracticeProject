@@ -1,7 +1,6 @@
-package org.example.dto;
+package org.example.dto.user;
 
 public enum Role {
     USER,
-    OWNER,
     ADMIN
 }

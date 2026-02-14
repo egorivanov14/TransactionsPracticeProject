@@ -1,7 +1,7 @@
 package org.example.service;
 
-import org.example.dto.StatisticsRequest;
-import org.example.dto.StatisticsResponse;
+import org.example.dto.chart.StatisticsRequest;
+import org.example.dto.chart.StatisticsResponse;
 
 public interface StatisticsService {
 

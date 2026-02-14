@@ -20,4 +20,6 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
 
     @Query("SELECT b FROM Budget b WHERE b.id = :id AND b.user.email = :email")
     Optional<Budget> findByBudgetIdAndUser(@Param("id") Long id, @Param("email") String email);
+
+    boolean existsByIdAndUserEmail(Long id, String email);
 }

@@ -2,8 +2,8 @@ package org.example.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.dto.StatisticsRequest;
-import org.example.dto.StatisticsResponse;
+import org.example.dto.chart.StatisticsRequest;
+import org.example.dto.chart.StatisticsResponse;
 import org.example.service.StatisticsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

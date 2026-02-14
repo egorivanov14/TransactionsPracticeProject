@@ -1,11 +1,11 @@
-package org.example.service;
+package org.example.service.implementation;
 
 import lombok.RequiredArgsConstructor;
-import org.example.dto.TransactionRequest;
-import org.example.dto.TransactionResponse;
+import org.example.dto.transaction.TransactionRequest;
+import org.example.dto.transaction.TransactionResponse;
 import org.example.entity.Budget;
 import org.example.entity.Transaction;
-import org.example.dto.Type;
+import org.example.dto.transaction.Type;
 import org.example.exception.AccessDeniedException;
 import org.example.exception.ExceedingBudgetException;
 import org.example.exception.ResourceNotFoundException;
@@ -13,6 +13,7 @@ import org.example.mapper.TransactionMapper;
 import org.example.repository.BudgetRepository;
 import org.example.repository.TransactionRepository;
 import org.example.repository.UserRepository;
+import org.example.service.TransactionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class TransactionServiceImpl implements TransactionService{
+public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
@@ -84,25 +85,6 @@ public class TransactionServiceImpl implements TransactionService{
         return transactions.map(transactionMapper::toResponse);
     }
 
-//    @Transactional(readOnly = true)
-//    @Override
-//    public List<TransactionResponse> getAllByAccountAndUser(String account, String email) {
-//
-//        List<Transaction> transactions = transactionRepository.findAllByAccountAndUser(account, email);
-//
-//        return transactions.stream().map(transactionMapper::toResponse).toList();
-//
-//    }
-//
-//    @Transactional(readOnly = true)
-//    @Override
-//    public List<TransactionResponse> getAllByCategoryAndUser(String category, String email) {
-//
-//        List<Transaction> transactions = transactionRepository.findAllByCategoryAndUser(category, email);
-//
-//        return transactions.stream().map(transactionMapper::toResponse).toList();
-//    }
-
     @Transactional(readOnly = true)
     @Override
     public Page<TransactionResponse> getAllByBudgetIdAndUser(Long budgetId, String email, Pageable pageable) {
@@ -111,17 +93,6 @@ public class TransactionServiceImpl implements TransactionService{
 
         return transactions.map(transactionMapper::toResponse);
     }
-
-//    @Transactional(readOnly = true)
-//    @Override
-//    public List<TransactionResponse> getAllByBudgetIdAndCategory(
-//            Long budgetId, String category, String email) {
-//
-//        List<Transaction> transactions = transactionRepository
-//                .findAllByBudgetIdAndCategoryAndUser(budgetId, category, email);
-//
-//        return transactions.stream().map(transactionMapper::toResponse).toList();
-//    }
 
     @Transactional(readOnly = true)
     @Override
@@ -139,22 +110,16 @@ public class TransactionServiceImpl implements TransactionService{
 
     }
 
-//    @Transactional(readOnly = true)
-//    @Override
-//    public List<TransactionResponse> getAllByAmountAndUser(Long amount, String email) {
-//
-//        List<Transaction> transactions = transactionRepository.findAllByAmountAndUser(amount, email);
-//
-//        return transactions.stream().map(transactionMapper::toResponse).toList();
-//
-//    }
-//
-//    @Transactional(readOnly = true)
-//    @Override
-//    public List<TransactionResponse> getAllByCreatedAtAndUser(LocalDate createdAt, String email) {
-//
-//        List<Transaction> transactions = transactionRepository.findAllByCreatedAtAndUser(createdAt, email);
-//
-//        return transactions.stream().map(transactionMapper::toResponse).toList();
-//    }
+    @Transactional(readOnly = true)
+    @Override
+    public Long getSumByType(String email, Long budgetId, Type type) {
+
+        if(budgetRepository.existsByIdAndUserEmail(budgetId, email)){
+            return transactionRepository.sumByType(budgetId, type, email);
+        }
+        else{
+            throw new AccessDeniedException("Not your budget.");
+        }
+
+    }
 }

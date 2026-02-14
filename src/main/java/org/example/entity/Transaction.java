@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.dto.Type;
+import org.example.dto.transaction.Type;
 
 import java.time.LocalDate;
 

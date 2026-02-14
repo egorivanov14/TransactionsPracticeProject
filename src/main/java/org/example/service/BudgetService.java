@@ -1,8 +1,8 @@
 package org.example.service;
 
-import org.example.dto.BudgetRequest;
-import org.example.dto.BudgetResponse;
-import org.example.dto.BudgetStatus;
+import org.example.dto.budget.BudgetRequest;
+import org.example.dto.budget.BudgetResponse;
+import org.example.dto.budget.BudgetStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

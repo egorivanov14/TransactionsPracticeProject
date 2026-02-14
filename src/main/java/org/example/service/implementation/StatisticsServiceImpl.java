@@ -1,12 +1,17 @@
-package org.example.service;
+package org.example.service.implementation;
 
 import lombok.RequiredArgsConstructor;
-import org.example.dto.*;
+import org.example.dto.chart.PieChartSector;
+import org.example.dto.chart.SchedulePoint;
+import org.example.dto.chart.StatisticsRequest;
+import org.example.dto.chart.StatisticsResponse;
+import org.example.dto.transaction.Type;
 import org.example.entity.Budget;
 import org.example.exception.AccessDeniedException;
 import org.example.exception.ResourceNotFoundException;
 import org.example.repository.BudgetRepository;
 import org.example.repository.TransactionRepository;
+import org.example.service.StatisticsService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,7 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class StatisticsServiceImpl implements StatisticsService{
+public class StatisticsServiceImpl implements StatisticsService {
 
     private final TransactionRepository transactionRepository;
     private final BudgetRepository budgetRepository;

@@ -1,9 +1,12 @@
 package org.example.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.example.dto.TransactionRequest;
-import org.example.dto.TransactionResponse;
+import org.example.dto.transaction.TransactionRequest;
+import org.example.dto.transaction.TransactionResponse;
+import org.example.dto.transaction.Type;
 import org.example.service.TransactionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -105,6 +108,15 @@ public class TransactionController {
         String email = userDetails.getUsername();
 
         return ResponseEntity.ok(transactionService.getAllByBudgetIdAndUser(budgetId, email, pageable));
+    }
+
+    @GetMapping("/budget/{budgetId}/sum")
+    public ResponseEntity<Long> getSumByType(@PathVariable Long budgetId,
+                                             @AuthenticationPrincipal UserDetails userDetails,
+                                             @RequestParam Type type){
+        String email = userDetails.getUsername();
+
+        return ResponseEntity.ok(transactionService.getSumByType(email, budgetId, type));
     }
 
 //    @GetMapping("/budgetId/{budgetId}/category/")

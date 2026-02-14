@@ -1,10 +1,10 @@
-package org.example.service;
+package org.example.service.implementation;
 
 import lombok.RequiredArgsConstructor;
-import org.example.dto.BudgetRequest;
-import org.example.dto.BudgetResponse;
-import org.example.dto.BudgetStatus;
-import org.example.dto.Type;
+import org.example.dto.budget.BudgetRequest;
+import org.example.dto.budget.BudgetResponse;
+import org.example.dto.budget.BudgetStatus;
+import org.example.dto.transaction.Type;
 import org.example.entity.Budget;
 import org.example.entity.User;
 import org.example.exception.AccessDeniedException;
@@ -13,6 +13,7 @@ import org.example.mapper.BudgetMapper;
 import org.example.repository.BudgetRepository;
 import org.example.repository.TransactionRepository;
 import org.example.repository.UserRepository;
+import org.example.service.BudgetService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,6 @@ public class BudgetServiceImpl implements BudgetService {
 
         budgetRepository.save(budget);
         userRepository.save(user);
-
     }
 
     @Transactional

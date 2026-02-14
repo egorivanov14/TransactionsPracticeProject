@@ -1,7 +1,10 @@
 package org.example.service;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.dto.*;
+import org.example.dto.user.LoginRequest;
+import org.example.dto.user.RegisterRequest;
+import org.example.dto.user.TokenResponse;
+import org.example.dto.user.UserDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,17 +18,11 @@ public interface UserService {
 
     void changeName(String newName, String email);
 
-//    void changeEmail(String email, String newEmail);
+    TokenResponse changeEmail(String email, String newEmail);
 
     void changePassword(String newPassword, String email);
 
     Page<UserDto> getAllUsers(Pageable pageable);
-
-    UserDto getUserById(Long id);
-
-    UserDto getUserByEmail(String email);
-
-    UserDto getUserByName(String name);
 
     TokenResponse refresh(String refreshToken, HttpServletResponse response);
 

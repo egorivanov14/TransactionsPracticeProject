@@ -1,6 +1,6 @@
 package org.example.repository;
 
-import org.example.dto.Type;
+import org.example.dto.transaction.Type;
 import org.example.entity.Transaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,22 +14,6 @@ import java.util.List;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-
-//    @Query("SELECT t FROM Transaction t WHERE t.budget.account = :account " +
-//            "AND t.user.email = :email")
-//    List<Transaction> findAllByAccountAndUser(@Param("account") String account, @Param("email") String email);
-//
-//    @Query("SELECT t FROM Transaction t WHERE t.category = :category " +
-//            "AND t.user.email = :email")
-//    List<Transaction> findAllByCategoryAndUser(@Param("category") String category, @Param("email") String email);
-//
-//    @Query("SELECT t FROM Transaction t WHERE t.createdAt = :createdAt " +
-//            "AND t.user.email = :email")
-//    List<Transaction> findAllByCreatedAtAndUser(@Param("createdAt") LocalDate createdAt, @Param("email") String email);
-//
-//    @Query("SELECT t FROM Transaction t WHERE t.amount = :amount " +
-//            "AND t.user.email = :email")
-//    List<Transaction> findAllByAmountAndUser(@Param("amount") Long amount, @Param("email") String email);
 
     @Query("SELECT t FROM Transaction t WHERE t.budget.id = :budgetId " +
             "AND t.user.email = :email")
@@ -59,12 +43,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                             @Param("date") LocalDate date,
                             @Param("email") String email);
 
-    @Query("SELECT t FROM Transaction t WHERE t.budget.id = :budgetId " +
-            "AND t.category = :category " +
-            "AND t.user.email = :email")
-    List<Transaction> findAllByBudgetIdAndCategoryAndUser(
-            @Param("budgetId") Long budgetId, @Param("category") String category, @Param("email") String email);
-
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.user.email = :email " +
             "AND t.type = 'INCOME' AND t.createdAt >= :startDate AND t.budget.id = :budgetId")
     Long getTotalIncome(@Param("email") String email,
@@ -76,13 +54,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     Long getTotalExpenditure(@Param("email") String email,
                              @Param("startDate") LocalDate startDate,
                              @Param("budgetId") Long budgetId);
-
-//    @Query("SELECT t FROM Transaction t WHERE t.user.email = :email AND t.createdAt >= :startDate " +
-//            "AND t.budget.id = :budgetId " +
-//            "ORDER BY t.createdAt ")
-//    List<Transaction> getTransactionsByBudgetAndPeriod(@Param("email") String email,
-//                                                       @Param("startDate") LocalDate startDate,
-//                                                       @Param("budgetId") Long budgetId);
 
     @Query("SELECT COUNT(t) FROM Transaction t WHERE t.user.email = :email " +
             "AND t.createdAt >= :startDate AND t.budget.id = :budgetId")

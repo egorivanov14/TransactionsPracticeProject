@@ -1,7 +1,8 @@
 package org.example.service;
 
-import org.example.dto.TransactionRequest;
-import org.example.dto.TransactionResponse;
+import org.example.dto.transaction.TransactionRequest;
+import org.example.dto.transaction.TransactionResponse;
+import org.example.dto.transaction.Type;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -13,18 +14,10 @@ public interface TransactionService {
 
     Page<TransactionResponse> getAllTransactionsByUser(String email, Pageable pageable);
 
-//    List<TransactionResponse> getAllByAccountAndUser(String account, String email);
-
-//    List<TransactionResponse> getAllByCategoryAndUser(String category, String email);
-
     Page<TransactionResponse> getAllByBudgetIdAndUser(Long budgetId, String email, Pageable pageable);
-
-//    List<TransactionResponse> getAllByBudgetIdAndCategory(Long budgetId, String category, String email);
 
     TransactionResponse getById(Long id, String email);
 
-//    List<TransactionResponse> getAllByAmountAndUser(Long amount, String email);
-
-//    List<TransactionResponse> getAllByCreatedAtAndUser(LocalDate createdAt, String email);
+    Long getSumByType(String email, Long budgetId, Type type);
 
 }

@@ -1,4 +1,4 @@
-package org.example.dto;
+package org.example.dto.chart;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
